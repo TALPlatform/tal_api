@@ -2,7 +2,9 @@ package api
 
 import (
 	// USECASE_IMPORTS
+
 	sourcingUsecase "github.com/TALPlatform/tal_api/app/sourcing/usecase"
+	"github.com/redis/go-redis/v9"
 
 	"fmt"
 
@@ -52,18 +54,11 @@ func HashFunc(req string) string {
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req), bcrypt.DefaultCost)
 	return string(hashedPassword)
 }
-func NewApi(config config.Config, store db.Store, tokenMaker auth.Maker, redisClient redisclient.RedisClientInterface, validator *protovalidate.Validator) (talv1connect.TalServiceHandler, error) {
+func NewApi(config config.Config, store db.Store, tokenMaker auth.Maker, redisClient redisclient.RedisClientInterface, genAiRedisClient *redis.Client, validator *protovalidate.Validator) (talv1connect.TalServiceHandler, error) {
 	resendClient, err := resend.NewResendService(config.ResendApiKey, config.ClientBaseUrl)
 	if err != nil {
 		return nil, err
 	}
-
-	// typesenseClient := typesenseclient.NewTypesenseClient(config.TypesenseHost, config.TypesensePort, config.TypesenseProtocol , config.TypesenseApiKey , false)
-	//
-	// err = typesenseClient.CreateCommandPaletteCollectionIfNotExists(context.Background())
-	// if err != nil {
-	// 	return nil , err
-	// }
 	// 👇 INIT WEAVIATE CLIENT
 	weaviateClient, err := weaviateclient.NewWeaviateClient(
 		config.WeaviateHost,
@@ -84,7 +79,7 @@ func NewApi(config config.Config, store db.Store, tokenMaker auth.Maker, redisCl
 		ServiceRoleKey: config.SupabaseServiceRoleKey,
 		ApiKey:         config.SupabaseApiKey,
 	})
-	llmClient, err := llm.NewLLM(config, redisClient.GetClient())
+	llmClient, err := llm.NewLLM(config, genAiRedisClient)
 	if err != nil {
 		return nil, fmt.Errorf("error creating llm api client : %w", err)
 	}
@@ -98,7 +93,10 @@ func NewApi(config config.Config, store db.Store, tokenMaker auth.Maker, redisCl
 	// USECASE_INSTANTIATIONS
 	sourcingUsecase := sourcingUsecase.NewSourcingUsecase(store, llmClient)
 
-	peopleUsecase := peopleUsecase.NewPeopleUsecase(store, crustDataClient, llmClient)
+	peopleUsecase, err := peopleUsecase.NewPeopleUsecase(store, crustDataClient, llmClient)
+	if err != nil {
+		return nil, fmt.Errorf("error creating people usecase : %w", err)
+	}
 
 	tenantUsecase := tenantUsecase.NewTenantUsecase(store, redisClient)
 	accountsUsecase := accountsUsecase.NewAccountsUsecase(store, supaapi, redisClient, tokenMaker, config.AccessTokenDuration, config.RefreshTokenDuration)

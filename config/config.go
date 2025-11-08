@@ -19,7 +19,7 @@ type Config struct {
 	CrustdataAPIKey       string   `mapstructure:"CRUSTDATA_API_KEY"`
 	CrustdataAPIURL       string   `mapstructure:"CRUSTDATA_API_URL"`
 	GeminiAPIKey          string   `mapstructure:"GEMINI_API_KEY"`
-	DefaultModel          string   `mapstructure:"DEFAULT_EMBEDDING_MODEL"`
+	DefaultModel          string   `mapstructure:"DEFAULT_MODEL"`
 	DefaultEmbeddingModel string   `mapstructure:"DEFAULT_EMBEDDING_MODEL"`
 	AllowedOrigins        []string `mapstructure:"ALLOWED_ORIGINS"`
 	ApiVersion            string   `mapstructure:"API_VERSION"`
@@ -41,12 +41,15 @@ type Config struct {
 	AppName                        string        `mapstructure:"APP_NAME"`
 	GitUser                        string        `mapstructure:"GIT_USER"`
 
-	ResendApiKey  string `mapstructure:"RESEND_API_KEY"`
-	RedisAddress  string `mapstructure:"REDIS_ADDRESS"`
-	RedisPort     string `mapstructure:"REDIS_PORT"`
-	RedisHost     string `mapstructure:"REDIS_HOST"`
-	RedisPassword string `mapstructure:"REDIS_PASSWORD"`
-	RedisDatabase int    `mapstructure:"REDIS_DATABASE"`
+	ResendApiKey      string `mapstructure:"RESEND_API_KEY"`
+	RedisAddress      string `mapstructure:"REDIS_ADDRESS"`
+	GenAIRedisAddress string `mapstructure:"GENAI_REDIS_DATABASE"`
+
+	RedisPort          string `mapstructure:"REDIS_PORT"`
+	RedisHost          string `mapstructure:"REDIS_HOST"`
+	RedisPassword      string `mapstructure:"REDIS_PASSWORD"`
+	RedisDatabase      int    `mapstructure:"REDIS_DATABASE"`
+	GenAIRedisDatabase int    `mapstructure:"GENAI_REDIS_DATABASE"`
 
 	IsCacheDisabled        bool   `mapstructure:"IS_CACHE_DISABLED"`
 	SupabaseAPIPort        uint32 `mapstructure:"SUPABASE_API_PORT"`

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -10,12 +11,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/bufbuild/protovalidate-go"
 	"github.com/TALPlatform/tal_api/api"
 	"github.com/TALPlatform/tal_api/config"
 	"github.com/TALPlatform/tal_api/db"
 	"github.com/TALPlatform/tal_api/pkg/auth"
 	"github.com/TALPlatform/tal_api/pkg/redisclient"
+	"github.com/bufbuild/protovalidate-go"
+	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -95,7 +97,13 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("can't get the validator")
 	}
-	server, err := api.NewServer(config, store, tokenMaker, redisClient, validator) // Start the server in a goroutine
+
+	genAiRedisClient := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", config.RedisHost, config.RedisPort),
+		Password: config.RedisPassword,      // no password set
+		DB:       config.GenAIRedisDatabase, // use default DB
+	})
+	server, err := api.NewServer(config, store, tokenMaker, redisClient, genAiRedisClient, validator) // Start the server in a goroutine
 	if err != nil {
 		log.Fatal().Err(err).Msg("server initialization failed")
 	}

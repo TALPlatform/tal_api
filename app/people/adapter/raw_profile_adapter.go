@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/TALPlatform/tal_api/db"
@@ -290,4 +291,89 @@ func (a *PeopleAdapter) RawProfileListGrpcFromSql(rows *[]*db.RawProfileListRow,
 	}
 
 	return resp
+}
+
+func (a *PeopleAdapter) RawProfileFindGrpcFromSql(req *db.RawProfileFindRow) *talv1.RawProfileFindResponse {
+	if req == nil {
+		return nil
+	}
+
+	// Helper to decode JSON arrays or objects into structs
+	decodeJSON := func(data []byte, v interface{}) {
+		if len(data) == 0 {
+			return
+		}
+		_ = json.Unmarshal(data, v)
+	}
+
+	// Helper to decode [][]byte JSON arrays (for arrays of objects)
+	decodeJSONArray := func(arr [][]byte, v interface{}) {
+		if len(arr) == 0 {
+			return
+		}
+
+		sliceValue := reflect.ValueOf(v).Elem() // must be pointer to slice
+		elemType := sliceValue.Type().Elem()
+
+		for _, b := range arr {
+			elemPtr := reflect.New(elemType)
+			if err := json.Unmarshal(b, elemPtr.Interface()); err != nil {
+				continue
+			}
+			sliceValue.Set(reflect.Append(sliceValue, elemPtr.Elem()))
+		}
+	}
+
+	// Prepare destination slices
+	var (
+		currentEmployers    []*talv1.Employment
+		pastEmployers       []*talv1.Employment
+		educationBackground []*talv1.Education
+		honors              []*talv1.Honor
+		certifications      []*talv1.Certification
+		openToCards         []bool
+	)
+
+	// Decode JSONB[] fields
+	decodeJSONArray(req.CurrentEmployers, &currentEmployers)
+	decodeJSONArray(req.PastEmployers, &pastEmployers)
+	decodeJSONArray(req.EducationBackground, &educationBackground)
+
+	// Decode single JSONB fields
+	decodeJSON(req.Honors, &honors)
+	decodeJSON(req.Certifications, &certifications)
+
+	// Handle open_to_cards JSONB[] → []bool
+	decodeJSONArray(req.OpenToCards, &openToCards)
+
+	// Handle region_address_components TEXT or JSON TEXT[]
+	var regionComponents []string
+	if req.RegionAddressComponents.Valid && req.RegionAddressComponents.String != "" {
+		_ = json.Unmarshal([]byte(req.RegionAddressComponents.String), &regionComponents)
+	}
+
+	return &talv1.RawProfileFindResponse{
+		PersonId:                req.PersonID,
+		Name:                    req.Name.String,
+		FirstName:               req.FirstName.String,
+		LastName:                req.LastName.String,
+		Region:                  req.Region.String,
+		RegionAddressComponents: regionComponents,
+		Headline:                req.Headline.String,
+		Summary:                 req.Summary.String,
+		Skills:                  req.Skills,
+		Languages:               req.Languages,
+		ProfileLanguage:         req.ProfileLanguage.String,
+		TwitterHandle:           req.TwitterHandle.String,
+		OpenToCards:             openToCards,
+		NumOfConnections:        req.NumOfConnections.Int32,
+		RecentlyChangedJobs:     req.RecentlyChangedJobs.Bool,
+		YearsOfExperience:       req.YearsOfExperience.String,
+		YearsOfExperienceRaw:    req.YearsOfExperienceRaw.Int32,
+		CurrentEmployers:        currentEmployers,
+		PastEmployers:           pastEmployers,
+		EducationBackground:     educationBackground,
+		Honors:                  honors,
+		Certifications:          certifications,
+	}
 }

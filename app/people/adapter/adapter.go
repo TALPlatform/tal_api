@@ -12,6 +12,7 @@ import (
 type PeopleAdapterInterface interface {
 	// INJECT INTERFACE
 
+	RawProfileFindGrpcFromSql(req *db.RawProfileFindRow) *talv1.RawProfileFindResponse
 	RawProfileListSqlFromGrpc(req *talv1.RawProfileListRequest) *db.RawProfileListParams
 	RawProfileListCrustDataFromGrpc(req *talv1.RawProfileListRequest) *crustdata.PeopleSearchRequest
 	RawProfileListDbFromCrustData(req *[]*crustdata.PersonDBProfile) *[]*db.RawProfileListRow

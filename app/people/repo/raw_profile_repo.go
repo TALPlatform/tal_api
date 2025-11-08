@@ -25,3 +25,10 @@ func (repo *PeopleRepo) RawProfileBulkCreateUpdate(ctx context.Context, params *
 	}
 	return nil
 }
+func (repo *PeopleRepo) RawProfileFind(ctx context.Context, req int32) (*db.RawProfileFindRow, error) {
+	resp, err := repo.store.RawProfileFind(ctx, int64(req))
+	if err != nil {
+		return nil, repo.store.DbErrorParser(err, repo.errorHandler)
+	}
+	return &resp, nil
+}

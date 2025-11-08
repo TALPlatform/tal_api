@@ -335,3 +335,135 @@ This powerful endpoint combines traditional text search with AI-powered vector s
 - Combine text queries with structured filters for optimal results
 - The hybrid scoring system (semantic_score + text_rank = hybrid_score) helps prioritize the most relevant candidates
 - All sourcing operations are tied to projects for better organization and reporting
+
+---
+
+## AI-Powered Profile Request Builder
+
+These endpoints help construct structured search requests for sourcing sessions using AI-assisted parsing of text prompts. They allow you to infer skills, locations, companies, industries, and projects from a natural language query.
+
+### Build a Raw Profile List Request
+
+**Endpoint**: `RawProfileListRequestBuild`
+
+Use this endpoint to generate a **structured request** for the `RawProfileList` search. The AI analyzes the text prompt and fills the fields: `industries`, `locations`, `skills`, `companies`, and `projects`.
+
+**Example Request**:
+
+```json
+{
+  "text": "senior js engineer with 5 years and on NYc"
+}
+```
+
+**Example Response**:
+
+```json
+{
+  "structured_response": {
+    "industries": [],
+    "locations": ["New York City"],
+    "skills": ["javascript"],
+    "companies": [],
+    "projects": []
+  }
+}
+```
+
+**Example Request with Fuzzy References**:
+
+```json
+{
+  "text": "FANG frontend dev with Python experience, remote"
+}
+```
+
+**Example Response**:
+
+```json
+{
+  "structured_response": {
+    "industries": [],
+    "locations": ["Remote"],
+    "skills": ["python"],
+    "companies": ["Facebook", "Amazon", "Netflix", "Google"],
+    "projects": []
+  }
+}
+```
+
+**Notes / Instructions for Users**:
+
+1. The `text` field can include natural language prompts describing the candidate profile, skills, locations, companies, or projects.
+2. The response **always contains only the five fields**: `industries`, `locations`, `skills`, `companies`, `projects`.
+3. AI normalizes abbreviations and fuzzy terms:
+
+   - `"js"` → `"javascript"`
+   - `"NYC"` → `"New York City"`
+   - `"FANG"` → `["Facebook", "Amazon", "Netflix", "Google"]`
+   - `"FE"` → `"Frontend"`, `"BE"` → `"Backend"`
+
+**Usage**:
+
+- Typically used before calling `RawProfileList` to pre-fill structured filters from a natural-language prompt.
+- Works best when combined with a `sourcing_session_id` to automatically save structured searches.
+  **Reference**: [Current agent instructions](https://docs.google.com/document/d/18mT4n5yEF8wKSTYVA0egWkK7lYMn1bsk2bdyfZexRBI/edit?usp=sharing)
+
+---
+
+### Find a Raw Profile by Person ID
+
+**Endpoint**: `RawProfileFind`
+
+Retrieve detailed information for a specific candidate using their `person_id`.
+
+**Example Request**:
+
+```json
+{
+  "person_id": 1586
+}
+```
+
+**Example Response**:
+
+```json
+{
+  "person_id": 1586,
+  "name": "Abhishek Kumar",
+  "headline": "Senior AI Engineer | Machine Learning Specialist",
+  "location": "San Francisco, California",
+  "current_title": "Lead AI Engineer",
+  "current_company": "Tech Innovations Inc",
+  "industry": "Artificial Intelligence",
+  "summary": "Experienced AI engineer with 12+ years building machine learning solutions across multiple industries. Specialized in computer vision and natural language processing.",
+  "skills": [
+    "python",
+    "tensorflow",
+    "machine learning",
+    "deep learning",
+    "java",
+    "c++"
+  ],
+  "years_of_experience": "12+ years",
+  "num_of_connections": 850,
+  "profile_picture_url": "https://example.com/profiles/abhishek.jpg",
+  "linkedin_profile_url": "https://linkedin.com/in/abhishekkumar"
+}
+```
+
+**Notes**:
+
+- This endpoint is useful to fetch a single candidate’s full profile after filtering candidates via `RawProfileList` or `RawProfileListRequestBuild`.
+
+---
+
+I can also **add a new "How to use RawProfileListRequestBuild + RawProfileList workflow" section** that shows the full workflow:
+
+1. Build structured request from text prompt
+2. Use it to call `RawProfileList`
+3. Save results to a sourcing session
+
+This will make the doc much clearer for users.
+
+Do you want me to add that workflow section next?

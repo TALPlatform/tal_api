@@ -39,6 +39,17 @@ import "tal/v1/tenant_tenant.proto";
 
 service TalService {
   // INJECT METHODS
+rpc RawProfileListRequestBuild(RawProfileListRequestBuildRequest) returns (RawProfileListRequestBuildResponse) {  
+
+    option (permission_group) = 'sourcing';
+    option (permission_name) = 'SourcingSessionCreate';
+option idempotency_level = NO_SIDE_EFFECTS;  
+}
+
+
+rpc RawProfileFind(RawProfileFindRequest) returns (RawProfileFindResponse) {  }
+
+
 rpc SourcingSessionProfileCreateUpdate(SourcingSessionProfileCreateUpdateRequest) returns (SourcingSessionProfileCreateUpdateResponse) { 
     option (permission_group) = 'sourcing';
     option (permission_name) = 'SourcingSessionUpdate';

@@ -8,12 +8,13 @@ import (
 	"connectrpc.com/connect"
 	"connectrpc.com/grpchealth"
 	"connectrpc.com/grpcreflect"
-	"github.com/bufbuild/protovalidate-go"
 	"github.com/TALPlatform/tal_api/config"
 	"github.com/TALPlatform/tal_api/db"
 	"github.com/TALPlatform/tal_api/pkg/auth"
 	"github.com/TALPlatform/tal_api/pkg/redisclient"
 	"github.com/TALPlatform/tal_api/proto_gen/tal/v1/talv1connect"
+	"github.com/bufbuild/protovalidate-go"
+	"github.com/redis/go-redis/v9"
 	"github.com/rs/cors"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/net/http2"
@@ -29,8 +30,8 @@ type Server struct {
 	api         talv1connect.TalServiceHandler
 }
 
-func NewServer(config config.Config, store db.Store, tokenMaker auth.Maker, redisClient redisclient.RedisClientInterface, validator *protovalidate.Validator) (*Server, error) {
-	api, err := NewApi(config, store, tokenMaker, redisClient, validator)
+func NewServer(config config.Config, store db.Store, tokenMaker auth.Maker, redisClient redisclient.RedisClientInterface, genAiRedisClient *redis.Client, validator *protovalidate.Validator) (*Server, error) {
+	api, err := NewApi(config, store, tokenMaker, redisClient, genAiRedisClient, validator)
 
 	if err != nil {
 		return nil, err
