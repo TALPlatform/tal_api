@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 )
 
-func (api *Api) SettingUpdate(ctx context.Context, req *connect.Request[devkitv1.SettingUpdateRequest]) (*connect.Response[devkitv1.SettingUpdateResponse], error) {
+func (api *Api) SettingUpdate(ctx context.Context, req *connect.Request[talv1.SettingUpdateRequest]) (*connect.Response[talv1.SettingUpdateResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -15,10 +15,10 @@ func (api *Api) SettingUpdate(ctx context.Context, req *connect.Request[devkitv1
 	if err != nil {
 		return nil, err
 	}
-	return connect.NewResponse(&devkitv1.SettingUpdateResponse{}), nil
+	return connect.NewResponse(&talv1.SettingUpdateResponse{}), nil
 }
 
-func (api *Api) SettingFindForUpdate(ctx context.Context, req *connect.Request[devkitv1.SettingFindForUpdateRequest]) (*connect.Response[devkitv1.SettingFindForUpdateResponse], error) {
+func (api *Api) SettingFindForUpdate(ctx context.Context, req *connect.Request[talv1.SettingFindForUpdateRequest]) (*connect.Response[talv1.SettingFindForUpdateResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}

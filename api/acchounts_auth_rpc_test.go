@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"connectrpc.com/connect"
-	"github.com/darwishdev/devkit-api/pkg/random"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/pkg/random"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 )
 
-var req *devkitv1.AuthRegisterRequest = &devkitv1.AuthRegisterRequest{
+var req *talv1.AuthRegisterRequest = &talv1.AuthRegisterRequest{
 	UserName:     random.RandomName(),
 	UserEmail:    random.RandomEmail(),
 	UserTypeId:   1,
@@ -31,7 +31,7 @@ func TestAuthRegister(t *testing.T) {
 }
 
 func TestAuthLogin(t *testing.T) {
-	req := &devkitv1.AuthLoginRequest{
+	req := &talv1.AuthLoginRequest{
 		LoginCode:    req.UserEmail,
 		UserPassword: req.UserPassword,
 	}

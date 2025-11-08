@@ -2,28 +2,33 @@ package api
 
 import (
 	// USECASE_IMPORTS
+	sourcingUsecase "github.com/TALPlatform/tal_api/app/sourcing/usecase"
 
-	propertyUsecase "github.com/darwishdev/devkit-api/app/property/usecase"
+	"fmt"
 
+	peopleUsecase "github.com/TALPlatform/tal_api/app/people/usecase"
+
+	accountsUsecase "github.com/TALPlatform/tal_api/app/accounts/usecase"
+	publicUsecase "github.com/TALPlatform/tal_api/app/public/usecase"
+	tenantUsecase "github.com/TALPlatform/tal_api/app/tenant/usecase"
+	"github.com/TALPlatform/tal_api/config"
+	"github.com/TALPlatform/tal_api/db"
+	"github.com/TALPlatform/tal_api/pkg/auth"
+	"github.com/TALPlatform/tal_api/pkg/crustdata"
+	"github.com/TALPlatform/tal_api/pkg/llm"
+	"github.com/TALPlatform/tal_api/pkg/redisclient"
 	"github.com/bufbuild/protovalidate-go"
-	accountsUsecase "github.com/darwishdev/devkit-api/app/accounts/usecase"
-	publicUsecase "github.com/darwishdev/devkit-api/app/public/usecase"
-	tenantUsecase "github.com/darwishdev/devkit-api/app/tenant/usecase"
-	"github.com/darwishdev/devkit-api/config"
-	"github.com/darwishdev/devkit-api/db"
-	"github.com/darwishdev/devkit-api/pkg/auth"
-	"github.com/darwishdev/devkit-api/pkg/redisclient"
 
-	"github.com/darwishdev/devkit-api/pkg/resend"
-	weaviateclient "github.com/darwishdev/devkit-api/pkg/weaviateclient"
-	"github.com/darwishdev/devkit-api/proto_gen/devkit/v1/devkitv1connect"
+	"github.com/TALPlatform/tal_api/pkg/resend"
+	weaviateclient "github.com/TALPlatform/tal_api/pkg/weaviateclient"
+	"github.com/TALPlatform/tal_api/proto_gen/tal/v1/talv1connect"
 	"github.com/darwishdev/sqlseeder"
 	supaapigo "github.com/darwishdev/supaapi-go"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Api struct {
-	devkitv1connect.UnimplementedDevkitServiceHandler
+	talv1connect.UnimplementedTalServiceHandler
 	accountsUsecase accountsUsecase.AccountsUsecaseInterface
 	config          config.Config
 	validator       *protovalidate.Validator
@@ -31,10 +36,12 @@ type Api struct {
 	sqlSeeder       sqlseeder.SeederInterface
 	publicUsecase   publicUsecase.PublicUsecaseInterface
 
-	weaviateClient  weaviateclient.WeaviateClientInterface // 👈 NEW FIELD
-	tenantUsecase   tenantUsecase.TenantUsecaseInterface
+	weaviateClient weaviateclient.WeaviateClientInterface // 👈 NEW FIELD
+	tenantUsecase  tenantUsecase.TenantUsecaseInterface
 	// USECASE_FIELDS
-	propertyUsecase propertyUsecase.PropertyUsecaseInterface
+	sourcingUsecase sourcingUsecase.SourcingUsecaseInterface
+
+	peopleUsecase peopleUsecase.PeopleUsecaseInterface
 
 	supaapi     supaapigo.Supaapi
 	redisClient redisclient.RedisClientInterface
@@ -45,7 +52,7 @@ func HashFunc(req string) string {
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req), bcrypt.DefaultCost)
 	return string(hashedPassword)
 }
-func NewApi(config config.Config, store db.Store, tokenMaker auth.Maker, redisClient redisclient.RedisClientInterface, validator *protovalidate.Validator) (devkitv1connect.DevkitServiceHandler, error) {
+func NewApi(config config.Config, store db.Store, tokenMaker auth.Maker, redisClient redisclient.RedisClientInterface, validator *protovalidate.Validator) (talv1connect.TalServiceHandler, error) {
 	resendClient, err := resend.NewResendService(config.ResendApiKey, config.ClientBaseUrl)
 	if err != nil {
 		return nil, err
@@ -61,7 +68,7 @@ func NewApi(config config.Config, store db.Store, tokenMaker auth.Maker, redisCl
 	weaviateClient, err := weaviateclient.NewWeaviateClient(
 		config.WeaviateHost,
 		config.WeaviateScheme,
-		)
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -77,17 +84,32 @@ func NewApi(config config.Config, store db.Store, tokenMaker auth.Maker, redisCl
 		ServiceRoleKey: config.SupabaseServiceRoleKey,
 		ApiKey:         config.SupabaseApiKey,
 	})
+	llmClient, err := llm.NewLLM(config, redisClient.GetClient())
+	if err != nil {
+		return nil, fmt.Errorf("error creating llm api client : %w", err)
+	}
+
+	crustDataClient, err := crustdata.NewCrustdataService(config.CrustdataAPIKey, config.CrustdataAPIURL)
+	if err != nil {
+		return nil, fmt.Errorf("error creating crustdata api client : %w", err)
+	}
+
 	sqlSeeder := sqlseeder.NewSeeder(sqlseeder.SeederConfig{HashFunc: HashFunc})
 	// USECASE_INSTANTIATIONS
-	propertyUsecase := propertyUsecase.NewPropertyUsecase(store)
+	sourcingUsecase := sourcingUsecase.NewSourcingUsecase(store, llmClient)
+
+	peopleUsecase := peopleUsecase.NewPeopleUsecase(store, crustDataClient, llmClient)
 
 	tenantUsecase := tenantUsecase.NewTenantUsecase(store, redisClient)
 	accountsUsecase := accountsUsecase.NewAccountsUsecase(store, supaapi, redisClient, tokenMaker, config.AccessTokenDuration, config.RefreshTokenDuration)
-	publicUsecase := publicUsecase.NewPublicUsecase(store, config.SupabaseApiKey, supaapi, redisClient, resendClient , weaviateClient)
+	publicUsecase := publicUsecase.NewPublicUsecase(store, config.SupabaseApiKey, supaapi, redisClient, resendClient, weaviateClient)
 	return &Api{
 		// USECASE_INJECTIONS
-		propertyUsecase: propertyUsecase,
-		weaviateClient:  weaviateClient,
+		sourcingUsecase: sourcingUsecase,
+
+		peopleUsecase: peopleUsecase,
+
+		weaviateClient: weaviateClient,
 		// typesenseClient: typesenseClient,
 		accountsUsecase: accountsUsecase,
 		tenantUsecase:   tenantUsecase,

@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 	"github.com/rs/zerolog/log"
 )
 
-func (u *TenantUsecase) TenantCreateUpdate(ctx context.Context, req *connect.Request[devkitv1.TenantCreateUpdateRequest]) (*devkitv1.TenantCreateUpdateResponse, error) {
+func (u *TenantUsecase) TenantCreateUpdate(ctx context.Context, req *connect.Request[talv1.TenantCreateUpdateRequest]) (*talv1.TenantCreateUpdateResponse, error) {
 	sqlReq := u.adapter.TenantCreateUpdateSqlFromGrpc(req.Msg)
 	record, err := u.repo.TenantCreateUpdate(ctx, sqlReq)
 	if err != nil {
@@ -19,13 +19,13 @@ func (u *TenantUsecase) TenantCreateUpdate(ctx context.Context, req *connect.Req
 		log.Error().Str("message", "clear cache failed :").Err(err).Msg("Cache Clear Failed")
 	}
 	resp := u.adapter.TenantEntityGrpcFromSql(record)
-	return &devkitv1.TenantCreateUpdateResponse{
+	return &talv1.TenantCreateUpdateResponse{
 		Tenant: resp,
 	}, nil
 
 }
 
-func (u *TenantUsecase) TenantFind(ctx context.Context, req *connect.Request[devkitv1.TenantFindRequest]) (*devkitv1.TenantFindResponse, error) {
+func (u *TenantUsecase) TenantFind(ctx context.Context, req *connect.Request[talv1.TenantFindRequest]) (*talv1.TenantFindResponse, error) {
 	cachedTenant, err := u.redisClient.TenantFind(ctx, req.Msg.TenantId)
 	if cachedTenant != nil {
 		if cachedTenant.TenantID != 0 && err == nil {
@@ -47,7 +47,7 @@ func (u *TenantUsecase) TenantFind(ctx context.Context, req *connect.Request[dev
 	return resp, nil
 
 }
-func (u *TenantUsecase) TenantList(ctx context.Context, req *connect.Request[devkitv1.TenantListRequest]) (*devkitv1.TenantListResponse, error) {
+func (u *TenantUsecase) TenantList(ctx context.Context, req *connect.Request[talv1.TenantListRequest]) (*talv1.TenantListResponse, error) {
 	record, err := u.repo.TenantList(ctx, 0)
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (u *TenantUsecase) TenantList(ctx context.Context, req *connect.Request[dev
 	return resp, nil
 
 }
-func (u *TenantUsecase) TenantDashboard(ctx context.Context, req *connect.Request[devkitv1.TenantDashboardRequest]) (*devkitv1.TenantDashboardResponse, error) {
+func (u *TenantUsecase) TenantDashboard(ctx context.Context, req *connect.Request[talv1.TenantDashboardRequest]) (*talv1.TenantDashboardResponse, error) {
 	records, err := u.repo.TenantDashboard(ctx)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (u *TenantUsecase) TenantDashboard(ctx context.Context, req *connect.Reques
 
 }
 
-func (u *TenantUsecase) TenantListInput(ctx context.Context, req *connect.Request[devkitv1.TenantListInputRequest]) (*devkitv1.TenantListInputResponse, error) {
+func (u *TenantUsecase) TenantListInput(ctx context.Context, req *connect.Request[talv1.TenantListInputRequest]) (*talv1.TenantListInputResponse, error) {
 	records, err := u.repo.TenantListInput(ctx, 0)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (u *TenantUsecase) TenantListInput(ctx context.Context, req *connect.Reques
 	return resp, nil
 
 }
-func (u *TenantUsecase) TenantDeleteRestore(ctx context.Context, req *connect.Request[devkitv1.TenantDeleteRestoreRequest]) (*devkitv1.TenantDeleteRestoreResponse, error) {
+func (u *TenantUsecase) TenantDeleteRestore(ctx context.Context, req *connect.Request[talv1.TenantDeleteRestoreRequest]) (*talv1.TenantDeleteRestoreResponse, error) {
 	record, err := u.repo.TenantDeleteRestore(ctx, req.Msg.GetRecords())
 	if err != nil {
 		return nil, err

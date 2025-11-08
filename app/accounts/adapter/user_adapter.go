@@ -3,16 +3,16 @@ package adapter
 import (
 	"encoding/json"
 
-	"github.com/darwishdev/devkit-api/db"
-	"github.com/darwishdev/devkit-api/pkg/dateutils"
-	"github.com/darwishdev/devkit-api/pkg/redisclient"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/db"
+	"github.com/TALPlatform/tal_api/pkg/dateutils"
+	"github.com/TALPlatform/tal_api/pkg/redisclient"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (a *AccountsAdapter) UserEntityGrpcFromSql(resp *db.AccountsSchemaUser) *devkitv1.AccountsSchemaUser {
-	return &devkitv1.AccountsSchemaUser{
+func (a *AccountsAdapter) UserEntityGrpcFromSql(resp *db.AccountsSchemaUser) *talv1.AccountsSchemaUser {
+	return &talv1.AccountsSchemaUser{
 		UserId:     int32(resp.UserID),
 		UserName:   resp.UserName,
 		UserImage:  resp.UserImage.String,
@@ -25,8 +25,8 @@ func (a *AccountsAdapter) UserEntityGrpcFromSql(resp *db.AccountsSchemaUser) *de
 	}
 }
 
-func (a *AccountsAdapter) UserFindRowGrpcFromSql(resp *db.UserFindRow) *devkitv1.UserFindRow {
-	record := &devkitv1.UserFindRow{
+func (a *AccountsAdapter) UserFindRowGrpcFromSql(resp *db.UserFindRow) *talv1.UserFindRow {
+	record := &talv1.UserFindRow{
 		UserId:            int32(resp.UserID),
 		UserImage:         resp.UserImage,
 		UserName:          resp.UserName,
@@ -50,8 +50,8 @@ func (a *AccountsAdapter) UserFindRowGrpcFromSql(resp *db.UserFindRow) *devkitv1
 	}
 	return record
 }
-func (a *AccountsAdapter) UserSessionGrpcFropmSql(resp *redisclient.AuthSession) *devkitv1.UserSession {
-	return &devkitv1.UserSession{
+func (a *AccountsAdapter) UserSessionGrpcFropmSql(resp *redisclient.AuthSession) *talv1.UserSession {
+	return &talv1.UserSession{
 		UserId:                        int32(resp.UserID),
 		SessionKey:                    resp.SessionKey,
 		IpAddress:                     resp.IPAddress,
@@ -63,16 +63,16 @@ func (a *AccountsAdapter) UserSessionGrpcFropmSql(resp *redisclient.AuthSession)
 		SupabaseRefreshTokenExpiresAt: dateutils.DateTimeToStringDigit(resp.SupabaseRefreshTokenExpiresAt),
 	}
 }
-func (a *AccountsAdapter) UserSessionsGrpcFropmSql(sessions []*redisclient.AuthSession) []*devkitv1.UserSession {
-	response := make([]*devkitv1.UserSession, len(sessions))
+func (a *AccountsAdapter) UserSessionsGrpcFropmSql(sessions []*redisclient.AuthSession) []*talv1.UserSession {
+	response := make([]*talv1.UserSession, len(sessions))
 
 	for index, session := range sessions {
 		response[index] = a.UserSessionGrpcFropmSql(session)
 	}
 	return response
 }
-func (a *AccountsAdapter) UserViewEntityGrpcFromSql(resp *db.AccountsSchemaUserView) *devkitv1.AccountsSchemaUserView {
-	record := &devkitv1.AccountsSchemaUserView{
+func (a *AccountsAdapter) UserViewEntityGrpcFromSql(resp *db.AccountsSchemaUserView) *talv1.AccountsSchemaUserView {
+	record := &talv1.AccountsSchemaUserView{
 		UserId:       int32(resp.UserID),
 		UserImage:    resp.UserImage,
 		UserName:     resp.UserName,
@@ -93,7 +93,7 @@ func (a *AccountsAdapter) UserViewEntityGrpcFromSql(resp *db.AccountsSchemaUserV
 	}
 	return record
 }
-func (a *AccountsAdapter) UserCreateUpdateSqlFromGrpc(req *devkitv1.UserCreateUpdateRequest) *db.UserCreateUpdateParams {
+func (a *AccountsAdapter) UserCreateUpdateSqlFromGrpc(req *talv1.UserCreateUpdateRequest) *db.UserCreateUpdateParams {
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req.UserPassword), bcrypt.DefaultCost)
 	resp := &db.UserCreateUpdateParams{
 		UserID:       req.UserId,
@@ -107,8 +107,8 @@ func (a *AccountsAdapter) UserCreateUpdateSqlFromGrpc(req *devkitv1.UserCreateUp
 	}
 	return resp
 }
-func (a *AccountsAdapter) UserFindForUpdateUpdateGrpcFromSql(resp *db.UserFindForUpdateRow) *devkitv1.UserCreateUpdateRequest {
-	return &devkitv1.UserCreateUpdateRequest{
+func (a *AccountsAdapter) UserFindForUpdateUpdateGrpcFromSql(resp *db.UserFindForUpdateRow) *talv1.UserCreateUpdateRequest {
+	return &talv1.UserCreateUpdateRequest{
 		UserId:     resp.UserID,
 		TenantId:   resp.TenantID.Int32,
 		UserName:   resp.UserName,
@@ -119,52 +119,52 @@ func (a *AccountsAdapter) UserFindForUpdateUpdateGrpcFromSql(resp *db.UserFindFo
 		Roles:      resp.Roles,
 	}
 }
-func (a *AccountsAdapter) UserTypeListInputGrpcFromSql(resp *[]db.UserTypeListInputRow) *devkitv1.UserTypeListInputResponse {
-	records := make([]*devkitv1.SelectInputOption, 0)
+func (a *AccountsAdapter) UserTypeListInputGrpcFromSql(resp *[]db.UserTypeListInputRow) *talv1.UserTypeListInputResponse {
+	records := make([]*talv1.SelectInputOption, 0)
 	for _, v := range *resp {
-		records = append(records, &devkitv1.SelectInputOption{
+		records = append(records, &talv1.SelectInputOption{
 			Value: v.Value,
 			Label: v.Label,
 		})
 	}
-	return &devkitv1.UserTypeListInputResponse{
+	return &talv1.UserTypeListInputResponse{
 		Options: records,
 	}
 }
 
-func (a *AccountsAdapter) UserListInputGrpcFromSql(resp *[]db.UserListInputRow) *devkitv1.UserListInputResponse {
-	records := make([]*devkitv1.SelectInputOption, 0)
+func (a *AccountsAdapter) UserListInputGrpcFromSql(resp *[]db.UserListInputRow) *talv1.UserListInputResponse {
+	records := make([]*talv1.SelectInputOption, 0)
 	for _, v := range *resp {
-		records = append(records, &devkitv1.SelectInputOption{
+		records = append(records, &talv1.SelectInputOption{
 			Value: v.Value,
 			Note:  v.Note,
 			Label: v.Label,
 		})
 	}
-	return &devkitv1.UserListInputResponse{
+	return &talv1.UserListInputResponse{
 		Options: records,
 	}
 }
-func (a *AccountsAdapter) UserPermissionListInputGrpcFromSql(resp *[]db.UserPermissionListInputRow) *devkitv1.UserPermissionListInputResponse {
-	groupedOptions := make([]*devkitv1.SelectInputOptionWithGroup, len(*resp))
+func (a *AccountsAdapter) UserPermissionListInputGrpcFromSql(resp *[]db.UserPermissionListInputRow) *talv1.UserPermissionListInputResponse {
+	groupedOptions := make([]*talv1.SelectInputOptionWithGroup, len(*resp))
 
 	for groupIndex, v := range *resp {
-		items := make([]*devkitv1.SelectInputOption, len(v.Options))
+		items := make([]*talv1.SelectInputOption, len(v.Options))
 		if err := json.Unmarshal(v.Options, &items); err != nil {
 			continue
 		}
-		groupedOptions[groupIndex] = &devkitv1.SelectInputOptionWithGroup{
+		groupedOptions[groupIndex] = &talv1.SelectInputOptionWithGroup{
 			GroupName: v.PermissionGroup,
 			Items:     items,
 		}
 	}
-	return &devkitv1.UserPermissionListInputResponse{
+	return &talv1.UserPermissionListInputResponse{
 		Options: groupedOptions,
 	}
 }
 
-func (a *AccountsAdapter) UserListRowGrpcFromSql(resp *db.AccountsSchemaUserView) *devkitv1.UserListRow {
-	record := &devkitv1.UserListRow{
+func (a *AccountsAdapter) UserListRowGrpcFromSql(resp *db.AccountsSchemaUserView) *talv1.UserListRow {
+	record := &talv1.UserListRow{
 		UserId:            int32(resp.UserID),
 		UserImage:         resp.UserImage,
 		UserName:          resp.UserName,
@@ -192,9 +192,9 @@ func (a *AccountsAdapter) UserListRowGrpcFromSql(resp *db.AccountsSchemaUserView
 	record.RoleIds = roleIds
 	return record
 }
-func (a *AccountsAdapter) UserListGrpcFromSql(resp *[]db.AccountsSchemaUserView) *devkitv1.UserListResponse {
-	records := make([]*devkitv1.UserListRow, 0)
-	deletedRecords := make([]*devkitv1.UserListRow, 0)
+func (a *AccountsAdapter) UserListGrpcFromSql(resp *[]db.AccountsSchemaUserView) *talv1.UserListResponse {
+	records := make([]*talv1.UserListRow, 0)
+	deletedRecords := make([]*talv1.UserListRow, 0)
 	for _, v := range *resp {
 		record := a.UserListRowGrpcFromSql(&v)
 		if v.DeletedAt.Valid {
@@ -203,13 +203,13 @@ func (a *AccountsAdapter) UserListGrpcFromSql(resp *[]db.AccountsSchemaUserView)
 			records = append(records, record)
 		}
 	}
-	return &devkitv1.UserListResponse{
+	return &talv1.UserListResponse{
 		DeletedRecords: deletedRecords,
 		Records:        records,
 	}
 }
-func (a *AccountsAdapter) UserCreateUpdateGrpcFromSql(resp *db.AccountsSchemaUser) *devkitv1.UserCreateUpdateResponse {
-	return &devkitv1.UserCreateUpdateResponse{
+func (a *AccountsAdapter) UserCreateUpdateGrpcFromSql(resp *db.AccountsSchemaUser) *talv1.UserCreateUpdateResponse {
+	return &talv1.UserCreateUpdateResponse{
 		User: a.UserEntityGrpcFromSql(resp),
 	}
 }

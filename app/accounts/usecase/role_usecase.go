@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
-	"github.com/darwishdev/devkit-api/db"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/db"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 )
 
-func (u *AccountsUsecase) RoleDelete(ctx context.Context, req *connect.Request[devkitv1.RoleDeleteRequest]) (*devkitv1.RoleDeleteResponse, error) {
-	response := make([]*devkitv1.AccountsSchemaRole, 0)
+func (u *AccountsUsecase) RoleDelete(ctx context.Context, req *connect.Request[talv1.RoleDeleteRequest]) (*talv1.RoleDeleteResponse, error) {
+	response := make([]*talv1.AccountsSchemaRole, 0)
 	for _, role := range req.Msg.Records {
 		params := db.RoleDeleteParams{
 			RoleID: role,
@@ -21,12 +21,12 @@ func (u *AccountsUsecase) RoleDelete(ctx context.Context, req *connect.Request[d
 
 		response = append(response, u.adapter.RoleEntityGrpcFromSql(deletedRole))
 	}
-	return &devkitv1.RoleDeleteResponse{
+	return &talv1.RoleDeleteResponse{
 		Records: response,
 	}, nil
 }
-func (u *AccountsUsecase) RoleDeleteRestore(ctx context.Context, req *connect.Request[devkitv1.RoleDeleteRestoreRequest]) (*devkitv1.RoleDeleteRestoreResponse, error) {
-	response := make([]*devkitv1.AccountsSchemaRole, 0)
+func (u *AccountsUsecase) RoleDeleteRestore(ctx context.Context, req *connect.Request[talv1.RoleDeleteRestoreRequest]) (*talv1.RoleDeleteRestoreResponse, error) {
+	response := make([]*talv1.AccountsSchemaRole, 0)
 	for _, rec := range req.Msg.Records {
 		params := db.RoleDeleteRestoreParams{
 			RoleID: rec,
@@ -37,21 +37,21 @@ func (u *AccountsUsecase) RoleDeleteRestore(ctx context.Context, req *connect.Re
 		}
 		response = append(response, u.adapter.RoleEntityGrpcFromSql(resp))
 	}
-	return &devkitv1.RoleDeleteRestoreResponse{
+	return &talv1.RoleDeleteRestoreResponse{
 		Records: response,
 	}, nil
 }
-func (u *AccountsUsecase) RoleFindForUpdate(ctx context.Context, req *connect.Request[devkitv1.RoleFindForUpdateRequest]) (*devkitv1.RoleFindForUpdateResponse, error) {
+func (u *AccountsUsecase) RoleFindForUpdate(ctx context.Context, req *connect.Request[talv1.RoleFindForUpdateRequest]) (*talv1.RoleFindForUpdateResponse, error) {
 	role, err := u.repo.RoleFindForUpdate(ctx, req.Msg.RecordId)
 	if err != nil {
 		return nil, err
 	}
 	request := u.adapter.RoleFindForUpdateUpdateGrpcFromSql(role)
-	return &devkitv1.RoleFindForUpdateResponse{
+	return &talv1.RoleFindForUpdateResponse{
 		Request: request,
 	}, nil
 }
-func (u *AccountsUsecase) RoleListInput(ctx context.Context) (*devkitv1.RoleListInputResponse, error) {
+func (u *AccountsUsecase) RoleListInput(ctx context.Context) (*talv1.RoleListInputResponse, error) {
 	roles, err := u.repo.RoleListInput(ctx)
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (u *AccountsUsecase) RoleListInput(ctx context.Context) (*devkitv1.RoleList
 	return response, nil
 }
 
-func (u *AccountsUsecase) RoleList(ctx context.Context, req *connect.Request[devkitv1.RoleListRequest]) (*devkitv1.RoleListResponse, error) {
+func (u *AccountsUsecase) RoleList(ctx context.Context, req *connect.Request[talv1.RoleListRequest]) (*talv1.RoleListResponse, error) {
 	roles, err := u.repo.RoleList(ctx)
 	if err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func (u *AccountsUsecase) RoleList(ctx context.Context, req *connect.Request[dev
 	return response, nil
 }
 
-func (u *AccountsUsecase) RoleCreateUpdate(ctx context.Context, req *connect.Request[devkitv1.RoleCreateUpdateRequest]) (*devkitv1.RoleCreateUpdateResponse, error) {
+func (u *AccountsUsecase) RoleCreateUpdate(ctx context.Context, req *connect.Request[talv1.RoleCreateUpdateRequest]) (*talv1.RoleCreateUpdateResponse, error) {
 	roleCreateParams := u.adapter.RoleCreateUpdateSqlFromGrpc(req.Msg)
 	role, err := u.repo.RoleCreateUpdate(ctx, *roleCreateParams)
 	if err != nil {

@@ -9,11 +9,11 @@ import (
 	"connectrpc.com/grpchealth"
 	"connectrpc.com/grpcreflect"
 	"github.com/bufbuild/protovalidate-go"
-	"github.com/darwishdev/devkit-api/config"
-	"github.com/darwishdev/devkit-api/db"
-	"github.com/darwishdev/devkit-api/pkg/auth"
-	"github.com/darwishdev/devkit-api/pkg/redisclient"
-	"github.com/darwishdev/devkit-api/proto_gen/devkit/v1/devkitv1connect"
+	"github.com/TALPlatform/tal_api/config"
+	"github.com/TALPlatform/tal_api/db"
+	"github.com/TALPlatform/tal_api/pkg/auth"
+	"github.com/TALPlatform/tal_api/pkg/redisclient"
+	"github.com/TALPlatform/tal_api/proto_gen/tal/v1/talv1connect"
 	"github.com/rs/cors"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/net/http2"
@@ -26,7 +26,7 @@ type Server struct {
 	tokenMaker  auth.Maker
 	redisClient redisclient.RedisClientInterface
 	validator   *protovalidate.Validator
-	api         devkitv1connect.DevkitServiceHandler
+	api         talv1connect.TalServiceHandler
 }
 
 func NewServer(config config.Config, store db.Store, tokenMaker auth.Maker, redisClient redisclient.RedisClientInterface, validator *protovalidate.Validator) (*Server, error) {
@@ -52,7 +52,7 @@ func (s Server) NewGrpcHttpServer() *http.Server {
 	compress1KB := connect.WithCompressMinBytes(1024)
 	interceptors := connect.WithInterceptors(s.NewValidateInterceptor(), s.NewAuthenticationInterceptor(), s.NewAuthorizationInterceptor(), s.NewLoggerInterceptor())
 
-	name, handler := devkitv1connect.NewDevkitServiceHandler(
+	name, handler := talv1connect.NewTalServiceHandler(
 		s.api,
 		interceptors,
 		compress1KB,
@@ -60,15 +60,15 @@ func (s Server) NewGrpcHttpServer() *http.Server {
 	mux.Handle(name, handler)
 
 	mux.Handle(grpchealth.NewHandler(
-		grpchealth.NewStaticChecker(devkitv1connect.DevkitServiceName),
+		grpchealth.NewStaticChecker(talv1connect.TalServiceName),
 		compress1KB,
 	))
 	mux.Handle(grpcreflect.NewHandlerV1(
-		grpcreflect.NewStaticReflector(devkitv1connect.DevkitServiceName),
+		grpcreflect.NewStaticReflector(talv1connect.TalServiceName),
 		compress1KB,
 	))
 	mux.Handle(grpcreflect.NewHandlerV1Alpha(
-		grpcreflect.NewStaticReflector(devkitv1connect.DevkitServiceName),
+		grpcreflect.NewStaticReflector(talv1connect.TalServiceName),
 		compress1KB,
 	))
 	allowedMap := make(map[string]bool)

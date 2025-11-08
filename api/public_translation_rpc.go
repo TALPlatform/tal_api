@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 )
 
-func (api *Api) TranslationDelete(ctx context.Context, req *connect.Request[devkitv1.TranslationDeleteRequest]) (*connect.Response[devkitv1.TranslationDeleteResponse], error) {
+func (api *Api) TranslationDelete(ctx context.Context, req *connect.Request[talv1.TranslationDeleteRequest]) (*connect.Response[talv1.TranslationDeleteResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -15,7 +15,7 @@ func (api *Api) TranslationDelete(ctx context.Context, req *connect.Request[devk
 	return connect.NewResponse(response), err
 }
 
-func (api *Api) TranslationFindLocale(ctx context.Context, req *connect.Request[devkitv1.TranslationFindLocaleRequest]) (*connect.Response[devkitv1.TranslationFindLocaleResponse], error) {
+func (api *Api) TranslationFindLocale(ctx context.Context, req *connect.Request[talv1.TranslationFindLocaleRequest]) (*connect.Response[talv1.TranslationFindLocaleResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -23,7 +23,7 @@ func (api *Api) TranslationFindLocale(ctx context.Context, req *connect.Request[
 	return connect.NewResponse(response), err
 }
 
-func (api *Api) TranslationList(ctx context.Context, req *connect.Request[devkitv1.TranslationListRequest]) (*connect.Response[devkitv1.TranslationListResponse], error) {
+func (api *Api) TranslationList(ctx context.Context, req *connect.Request[talv1.TranslationListRequest]) (*connect.Response[talv1.TranslationListResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -31,7 +31,7 @@ func (api *Api) TranslationList(ctx context.Context, req *connect.Request[devkit
 	return connect.NewResponse(response), err
 }
 
-func (api *Api) TranslationCreateUpdateBulk(ctx context.Context, req *connect.Request[devkitv1.TranslationCreateUpdateBulkRequest]) (*connect.Response[devkitv1.TranslationCreateUpdateBulkResponse], error) {
+func (api *Api) TranslationCreateUpdateBulk(ctx context.Context, req *connect.Request[talv1.TranslationCreateUpdateBulkRequest]) (*connect.Response[talv1.TranslationCreateUpdateBulkResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}

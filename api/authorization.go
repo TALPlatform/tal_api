@@ -7,11 +7,11 @@ import (
 	"net/http"
 
 	"connectrpc.com/connect"
-	"github.com/darwishdev/devkit-api/pkg/auth"
-	"github.com/darwishdev/devkit-api/pkg/contextkeys"
-	"github.com/darwishdev/devkit-api/pkg/headerkeys"
-	"github.com/darwishdev/devkit-api/pkg/redisclient"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/pkg/auth"
+	"github.com/TALPlatform/tal_api/pkg/contextkeys"
+	"github.com/TALPlatform/tal_api/pkg/headerkeys"
+	"github.com/TALPlatform/tal_api/pkg/redisclient"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 	"github.com/iancoleman/strcase"
 	"github.com/rs/zerolog/log"
 )
@@ -77,7 +77,7 @@ func (api *Api) CheckForAccess(ctx context.Context, function string, group strin
 
 }
 
-func (api *Api) getAvailableOptions(header http.Header, variants ...string) *devkitv1.AvailableOptions {
+func (api *Api) getAvailableOptions(header http.Header, variants ...string) *talv1.AvailableOptions {
 	variant := "list"
 	if len(variants) > 0 {
 		variant = variants[0]
@@ -94,7 +94,7 @@ func (api *Api) getAvailableOptions(header http.Header, variants ...string) *dev
 		createUpdate                 = strcase.ToCamel(fmt.Sprintf("%s_create_update", group))
 		deleteKey                    = strcase.ToCamel(fmt.Sprintf("%s_delete", group))
 		deleteRestore                = strcase.ToCamel(fmt.Sprintf("%s_delete_restore", group))
-		result                       = &devkitv1.AvailableOptions{
+		result                       = &talv1.AvailableOptions{
 			Title:       fmt.Sprintf("%s_%s", variant, group),
 			Description: fmt.Sprintf("%s_%s_description", variant, group),
 		}
@@ -106,7 +106,7 @@ func (api *Api) getAvailableOptions(header http.Header, variants ...string) *dev
 	if variant == "list" {
 		isCreatePermitted, ok := permittedActions[create]
 		if isCreatePermitted && ok {
-			result.CreateHandler = &devkitv1.CreateHandler{
+			result.CreateHandler = &talv1.CreateHandler{
 				RedirectRoute: redirectRoute,
 				Title:         create,
 				Endpoint:      strcase.ToLowerCamel(createUpdate),
@@ -116,7 +116,7 @@ func (api *Api) getAvailableOptions(header http.Header, variants ...string) *dev
 	}
 	isUpdatePermitted, ok := permittedActions[update]
 	if isUpdatePermitted && ok {
-		result.UpdateHandler = &devkitv1.UpdateHandler{
+		result.UpdateHandler = &talv1.UpdateHandler{
 			RedirectRoute:        redirectRoute,
 			Title:                update,
 			Endpoint:             strcase.ToLowerCamel(createUpdate),
@@ -128,14 +128,14 @@ func (api *Api) getAvailableOptions(header http.Header, variants ...string) *dev
 	}
 	isDeletePermitted, ok := permittedActions[deleteKey]
 	if isDeletePermitted && ok {
-		result.DeleteHandler = &devkitv1.DeleteHandler{
+		result.DeleteHandler = &talv1.DeleteHandler{
 			Endpoint:        strcase.ToLowerCamel(deleteKey),
 			RequestProperty: deleteRestoreRequestProperty,
 		}
 	}
 	isDeleteRestorePermitted, ok := permittedActions[deleteRestore]
 	if isDeleteRestorePermitted && ok {
-		result.DeleteRestoreHandler = &devkitv1.DeleteRestoreHandler{
+		result.DeleteRestoreHandler = &talv1.DeleteRestoreHandler{
 			Endpoint:        strcase.ToLowerCamel(deleteRestore),
 			RequestProperty: deleteRestoreRequestProperty,
 		}

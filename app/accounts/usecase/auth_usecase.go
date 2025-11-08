@@ -6,27 +6,27 @@ import (
 	"strings"
 
 	"connectrpc.com/connect"
-	"github.com/darwishdev/devkit-api/db"
-	"github.com/darwishdev/devkit-api/pkg/contextkeys"
-	"github.com/darwishdev/devkit-api/pkg/redisclient"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/db"
+	"github.com/TALPlatform/tal_api/pkg/contextkeys"
+	"github.com/TALPlatform/tal_api/pkg/redisclient"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 	"github.com/rs/zerolog/log"
 	"github.com/supabase-community/auth-go/types"
 )
 
 func (u *AccountsUsecase) AuthSessionDelete(
 	ctx context.Context,
-	req *connect.Request[devkitv1.AuthSessionDeleteRequest],
-) (*devkitv1.AuthSessionDeleteResponse, error) {
+	req *connect.Request[talv1.AuthSessionDeleteRequest],
+) (*talv1.AuthSessionDeleteResponse, error) {
 	err := u.redisClient.AuthSessionDeleteByKey(ctx, req.Msg.SessionKey)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
-	return &devkitv1.AuthSessionDeleteResponse{
+	return &talv1.AuthSessionDeleteResponse{
 		Message: "Session deleted successfully",
 	}, nil
 }
-func (u *AccountsUsecase) AuthSessionList(ctx context.Context, req *connect.Request[devkitv1.AuthSessionListRequest]) (*devkitv1.AuthSessionListResponse, error) {
+func (u *AccountsUsecase) AuthSessionList(ctx context.Context, req *connect.Request[talv1.AuthSessionListRequest]) (*talv1.AuthSessionListResponse, error) {
 	var sessions []*redisclient.AuthSession
 	var err error
 	if req.Msg.UserId > 0 {
@@ -43,20 +43,20 @@ func (u *AccountsUsecase) AuthSessionList(ctx context.Context, req *connect.Requ
 }
 func (u *AccountsUsecase) AuthSessionSetBlocked(
 	ctx context.Context,
-	req *connect.Request[devkitv1.AuthSessionSetBlockedRequest],
-) (*devkitv1.AuthSessionSetBlockedResponse, error) {
+	req *connect.Request[talv1.AuthSessionSetBlockedRequest],
+) (*talv1.AuthSessionSetBlockedResponse, error) {
 	err := u.redisClient.AuthSessionSetBlockedByKey(ctx, req.Msg.SessionKey, req.Msg.IsBlocked)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
-	return &devkitv1.AuthSessionSetBlockedResponse{
+	return &talv1.AuthSessionSetBlockedResponse{
 		Message: "Session block status updated successfully",
 	}, nil
 }
 func (u *AccountsUsecase) AuthLogout(
 	ctx context.Context,
-	req *connect.Request[devkitv1.AuthLogoutRequest],
-) (*devkitv1.AuthLogoutResponse, error) {
+	req *connect.Request[talv1.AuthLogoutRequest],
+) (*talv1.AuthLogoutResponse, error) {
 	// Extract app-level refresh token
 	refreshToken, ok := contextkeys.RefreshToken(ctx)
 	if !ok {
@@ -88,12 +88,12 @@ func (u *AccountsUsecase) AuthLogout(
 		// Optional: proceed anyway
 	}
 
-	return &devkitv1.AuthLogoutResponse{}, nil
+	return &talv1.AuthLogoutResponse{}, nil
 }
 func (u *AccountsUsecase) AuthRefreshToken(
 	ctx context.Context,
-	req *connect.Request[devkitv1.AuthRefreshTokenRequest],
-) (*devkitv1.AuthRefreshTokenResponse, error) {
+	req *connect.Request[talv1.AuthRefreshTokenRequest],
+) (*talv1.AuthRefreshTokenResponse, error) {
 	refreshToken, ok := contextkeys.RefreshToken(ctx)
 	log.Debug().Interface("Refresh", refreshToken).Msg("refresh")
 	log.Debug().Interface("Refresh", ok).Msg("refresh")
@@ -110,9 +110,9 @@ func (u *AccountsUsecase) AuthRefreshToken(
 	if err != nil {
 		return nil, connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("failed to fetch user from db : %w", err))
 	}
-	response := &devkitv1.AuthLoginResponse{
-		LoginInfo: &devkitv1.LoginInfo{},
-		User:      &devkitv1.AccountsSchemaUserView{UserId: user.UserID, TenantId: user.TenantID.Int32, UserSecurityLevel: user.UserSecurityLevel},
+	response := &talv1.AuthLoginResponse{
+		LoginInfo: &talv1.LoginInfo{},
+		User:      &talv1.AccountsSchemaUserView{UserId: user.UserID, TenantId: user.TenantID.Int32, UserSecurityLevel: user.UserSecurityLevel},
 	}
 
 	err = u.WithTokens(ctx, req.Peer().Addr, req.Header().Get("User-Agent"), user.UserEmail, response, "", "")
@@ -128,11 +128,11 @@ func (u *AccountsUsecase) AuthRefreshToken(
 	}
 
 	// // 3. Return new tokens
-	return &devkitv1.AuthRefreshTokenResponse{
+	return &talv1.AuthRefreshTokenResponse{
 		LoginInfo: response.LoginInfo,
 	}, nil
 }
-func (u *AccountsUsecase) UserGenerateTokens(username string, userId int32, tenantId int32, userSecurityLevel int32) (*devkitv1.LoginInfo, string, string, error) {
+func (u *AccountsUsecase) UserGenerateTokens(username string, userId int32, tenantId int32, userSecurityLevel int32) (*talv1.LoginInfo, string, string, error) {
 	tokens, err := u.tokenMaker.CreateTokenPair(
 		username,
 		userId,
@@ -144,7 +144,7 @@ func (u *AccountsUsecase) UserGenerateTokens(username string, userId int32, tena
 	if err != nil {
 		return nil, "", "", err
 	}
-	return &devkitv1.LoginInfo{
+	return &talv1.LoginInfo{
 		AccessToken:           tokens.AccessToken,
 		RefreshToken:          tokens.RefreshToken,
 		AccessTokenExpiresAt:  db.TimeToString(tokens.AccessPayload.ExpiredAt),
@@ -152,7 +152,7 @@ func (u *AccountsUsecase) UserGenerateTokens(username string, userId int32, tena
 	}, tokens.RefreshPayload.ID.String(), tokens.AccessPayload.ID.String(), nil
 }
 
-func (u *AccountsUsecase) AppLogin(ctx context.Context, loginCode string, userId int32) (*devkitv1.AuthLoginResponse, error) {
+func (u *AccountsUsecase) AppLogin(ctx context.Context, loginCode string, userId int32) (*talv1.AuthLoginResponse, error) {
 	user, err := u.repo.UserFindForAuth(ctx, db.UserFindForAuthParams{SearchKey: strings.ToLower(loginCode), UserID: userId})
 	if err != nil {
 		return nil, err
@@ -181,7 +181,7 @@ func (u *AccountsUsecase) AppLogin(ctx context.Context, loginCode string, userId
 	return response, nil
 }
 
-func (u *AccountsUsecase) AuthRegister(ctx context.Context, req *connect.Request[devkitv1.AuthRegisterRequest]) (*devkitv1.AuthRegisterResponse, error) {
+func (u *AccountsUsecase) AuthRegister(ctx context.Context, req *connect.Request[talv1.AuthRegisterRequest]) (*talv1.AuthRegisterResponse, error) {
 	userCreateRequest := u.adapter.UserCreateUpdateRequestFromAuthRegister(req.Msg)
 	user, err := u.UserCreateUpdate(contextkeys.WithCallerID(ctx, 1), connect.NewRequest(userCreateRequest))
 	if err != nil {
@@ -208,13 +208,13 @@ func (u *AccountsUsecase) AuthRegister(ctx context.Context, req *connect.Request
 	if err != nil {
 		return nil, err
 	}
-	return &devkitv1.AuthRegisterResponse{
+	return &talv1.AuthRegisterResponse{
 		User:      response.User,
 		LoginInfo: response.LoginInfo,
 	}, nil
 }
 
-func (u *AccountsUsecase) WithNavigationBar(ctx context.Context, response *devkitv1.AuthLoginResponse) error {
+func (u *AccountsUsecase) WithNavigationBar(ctx context.Context, response *talv1.AuthLoginResponse) error {
 	navigtionBarRequest := db.UserNavigationBarFindParams{
 		UserID:          response.User.UserId,
 		NavigationBarID: response.User.UserTypeId,
@@ -232,7 +232,7 @@ func (u *AccountsUsecase) WithNavigationBar(ctx context.Context, response *devki
 	}
 	return nil
 }
-func (u *AccountsUsecase) WithTokens(ctx context.Context, addr string, userAgent string, loginCode string, response *devkitv1.AuthLoginResponse, supaToken string, supaRefreshToken string) error {
+func (u *AccountsUsecase) WithTokens(ctx context.Context, addr string, userAgent string, loginCode string, response *talv1.AuthLoginResponse, supaToken string, supaRefreshToken string) error {
 	loginInfo, tokenID, accessTokenId, err := u.UserGenerateTokens(loginCode, response.User.UserId, response.User.TenantId, response.User.UserSecurityLevel)
 	if err != nil {
 		return err
@@ -258,7 +258,7 @@ func (u *AccountsUsecase) WithTokens(ctx context.Context, addr string, userAgent
 	return nil
 }
 
-func (u *AccountsUsecase) AuthLogin(ctx context.Context, req *connect.Request[devkitv1.AuthLoginRequest]) (*devkitv1.AuthLoginResponse, error) {
+func (u *AccountsUsecase) AuthLogin(ctx context.Context, req *connect.Request[talv1.AuthLoginRequest]) (*talv1.AuthLoginResponse, error) {
 	userFindParams, supabaseRequest := u.adapter.AuthLoginSqlFromGrpc(req.Msg)
 	supaResponse, err := u.supaapi.AuthClient.Token(*supabaseRequest)
 	if err != nil {
@@ -283,23 +283,23 @@ func (u *AccountsUsecase) AuthLogin(ctx context.Context, req *connect.Request[de
 	return response, nil
 }
 
-func (u *AccountsUsecase) AuthLoginProvider(ctx context.Context, req *connect.Request[devkitv1.AuthLoginProviderRequest]) (*devkitv1.AuthLoginProviderResponse, error) {
+func (u *AccountsUsecase) AuthLoginProvider(ctx context.Context, req *connect.Request[talv1.AuthLoginProviderRequest]) (*talv1.AuthLoginProviderResponse, error) {
 	resp, err := u.supaapi.ProviderLogin(types.Provider(req.Msg.Provider), req.Msg.RedirectUrl)
 	if err != nil {
 		return nil, err
 	}
-	return &devkitv1.AuthLoginProviderResponse{Url: resp.AuthorizationURL}, nil
+	return &talv1.AuthLoginProviderResponse{Url: resp.AuthorizationURL}, nil
 }
 
-func (u *AccountsUsecase) AuthInvite(ctx context.Context, req *connect.Request[devkitv1.AuthInviteRequest]) (*devkitv1.AuthInviteResponse, error) {
+func (u *AccountsUsecase) AuthInvite(ctx context.Context, req *connect.Request[talv1.AuthInviteRequest]) (*talv1.AuthInviteResponse, error) {
 	_, err := u.supaapi.AuthClient.Invite(types.InviteRequest{Email: req.Msg.UserEmail})
 	if err != nil {
 		return nil, err
 	}
-	return &devkitv1.AuthInviteResponse{Message: "invitation sent"}, nil
+	return &talv1.AuthInviteResponse{Message: "invitation sent"}, nil
 }
 
-func (u *AccountsUsecase) AuthResetPassword(ctx context.Context, req *connect.Request[devkitv1.AuthResetPasswordRequest]) (*devkitv1.AuthResetPasswordResponse, error) {
+func (u *AccountsUsecase) AuthResetPassword(ctx context.Context, req *connect.Request[talv1.AuthResetPasswordRequest]) (*talv1.AuthResetPasswordResponse, error) {
 	if len(req.Msg.ResetToken) == 6 {
 		resp, err := u.supaapi.AuthClient.VerifyForUser(*u.adapter.AuthResetPasswordSupaFromGrpc(req.Msg))
 		if err != nil {
@@ -315,25 +315,25 @@ func (u *AccountsUsecase) AuthResetPassword(ctx context.Context, req *connect.Re
 	if err != nil {
 		return nil, err
 	}
-	userResp, err := u.AuthLogin(ctx, connect.NewRequest(&devkitv1.AuthLoginRequest{
+	userResp, err := u.AuthLogin(ctx, connect.NewRequest(&talv1.AuthLoginRequest{
 		LoginCode:    req.Msg.Email,
 		UserPassword: req.Msg.NewPassword,
 	}))
 	if err != nil {
 		return nil, err
 	}
-	return &devkitv1.AuthResetPasswordResponse{User: userResp.User, LoginInfo: userResp.LoginInfo, NavigationBar: userResp.NavigationBar}, nil
+	return &talv1.AuthResetPasswordResponse{User: userResp.User, LoginInfo: userResp.LoginInfo, NavigationBar: userResp.NavigationBar}, nil
 }
 
-func (u *AccountsUsecase) AuthResetPasswordEmail(ctx context.Context, req *connect.Request[devkitv1.AuthResetPasswordEmailRequest]) (*devkitv1.AuthResetPasswordEmailResponse, error) {
+func (u *AccountsUsecase) AuthResetPasswordEmail(ctx context.Context, req *connect.Request[talv1.AuthResetPasswordEmailRequest]) (*talv1.AuthResetPasswordEmailResponse, error) {
 	err := u.supaapi.AuthClient.Recover(types.RecoverRequest{Email: req.Msg.Email})
 	if err != nil {
 		return nil, err
 	}
-	return &devkitv1.AuthResetPasswordEmailResponse{}, nil
+	return &talv1.AuthResetPasswordEmailResponse{}, nil
 }
 
-func (u *AccountsUsecase) AuthLoginProviderCallback(ctx context.Context, req *connect.Request[devkitv1.AuthLoginProviderCallbackRequest]) (*devkitv1.AuthLoginProviderCallbackResponse, error) {
+func (u *AccountsUsecase) AuthLoginProviderCallback(ctx context.Context, req *connect.Request[talv1.AuthLoginProviderCallbackRequest]) (*talv1.AuthLoginProviderCallbackResponse, error) {
 	user, err := u.supaapi.AuthClient.WithToken(req.Msg.AccessToken).GetUser()
 	if err != nil {
 		return nil, err
@@ -351,7 +351,7 @@ func (u *AccountsUsecase) AuthLoginProviderCallback(ctx context.Context, req *co
 	if err != nil {
 		return nil, err
 	}
-	return &devkitv1.AuthLoginProviderCallbackResponse{
+	return &talv1.AuthLoginProviderCallbackResponse{
 		User:          response.User,
 		NavigationBar: response.NavigationBar,
 		LoginInfo:     response.LoginInfo,

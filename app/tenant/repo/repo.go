@@ -4,7 +4,7 @@ import (
 	// INJECT IMPORTS
 	"context"
 
-	"github.com/darwishdev/devkit-api/db"
+	"github.com/TALPlatform/tal_api/db"
 )
 
 type TenantRepoInterface interface {

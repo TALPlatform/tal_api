@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
-	"github.com/darwishdev/devkit-api/db"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/db"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 	"github.com/rs/zerolog/log"
 )
 
-func (u *TenantUsecase) PageList(ctx context.Context, req *connect.Request[devkitv1.PageListRequest]) (*devkitv1.PageListResponse, error) {
+func (u *TenantUsecase) PageList(ctx context.Context, req *connect.Request[talv1.PageListRequest]) (*talv1.PageListResponse, error) {
 	record, err := u.repo.PageList(ctx, 0)
 	if err != nil {
 		return nil, err
@@ -20,7 +20,7 @@ func (u *TenantUsecase) PageList(ctx context.Context, req *connect.Request[devki
 
 }
 
-func (u *TenantUsecase) PageCreateUpdate(ctx context.Context, req *connect.Request[devkitv1.PageCreateUpdateRequest]) (*devkitv1.PageCreateUpdateResponse, error) {
+func (u *TenantUsecase) PageCreateUpdate(ctx context.Context, req *connect.Request[talv1.PageCreateUpdateRequest]) (*talv1.PageCreateUpdateResponse, error) {
 
 	sqlReq := u.adapter.PageCreateUpdateSqlFromGrpc(req.Msg)
 	record, err := u.repo.PageCreateUpdate(ctx, sqlReq)
@@ -33,11 +33,11 @@ func (u *TenantUsecase) PageCreateUpdate(ctx context.Context, req *connect.Reque
 	if err != nil {
 		log.Error().Str("message", "clear cache failed :").Err(err).Msg("Cache Clear Failed")
 	}
-	return &devkitv1.PageCreateUpdateResponse{Record: resp}, nil
+	return &talv1.PageCreateUpdateResponse{Record: resp}, nil
 
 }
 
-func (u *TenantUsecase) PageDeleteRestore(ctx context.Context, req *connect.Request[devkitv1.PageDeleteRestoreRequest]) (*devkitv1.PageDeleteRestoreResponse, error) {
+func (u *TenantUsecase) PageDeleteRestore(ctx context.Context, req *connect.Request[talv1.PageDeleteRestoreRequest]) (*talv1.PageDeleteRestoreResponse, error) {
 	record, err := u.repo.PageDeleteRestore(ctx, &req.Msg.Records)
 	if err != nil {
 		return nil, err
@@ -51,11 +51,11 @@ func (u *TenantUsecase) PageDeleteRestore(ctx context.Context, req *connect.Requ
 		}
 	}
 	resp := u.adapter.PageEntityListGrpcFromSql(record)
-	return &devkitv1.PageDeleteRestoreResponse{Records: *resp}, nil
+	return &talv1.PageDeleteRestoreResponse{Records: *resp}, nil
 
 }
 
-func (u *TenantUsecase) PageFindForUpdate(ctx context.Context, req *connect.Request[devkitv1.PageFindForUpdateRequest]) (*devkitv1.PageFindForUpdateResponse, error) {
+func (u *TenantUsecase) PageFindForUpdate(ctx context.Context, req *connect.Request[talv1.PageFindForUpdateRequest]) (*talv1.PageFindForUpdateResponse, error) {
 	record, err := u.repo.PageFindForUpdate(ctx, db.PageFindForUpdateParams{PageID: req.Msg.RecordId})
 	if err != nil {
 		return nil, err

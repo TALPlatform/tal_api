@@ -3,14 +3,14 @@ package adapter
 import (
 	"fmt"
 
-	"github.com/darwishdev/devkit-api/db"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/db"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 	storage_go "github.com/darwishdev/storage-go"
 	"github.com/rs/zerolog/log"
 )
 
-func (a *PublicAdapter) StorageBucketGrpcFromSupa(resp *storage_go.Bucket) *devkitv1.StorageBucket {
-	return &devkitv1.StorageBucket{
+func (a *PublicAdapter) StorageBucketGrpcFromSupa(resp *storage_go.Bucket) *talv1.StorageBucket {
+	return &talv1.StorageBucket{
 		Name:      resp.Name,
 		CreatedAt: resp.CreatedAt,
 		Id:        resp.Id,
@@ -18,13 +18,13 @@ func (a *PublicAdapter) StorageBucketGrpcFromSupa(resp *storage_go.Bucket) *devk
 	}
 }
 
-func (a *PublicAdapter) FileCreateResponseGrpcFromSupa(resp *storage_go.FileUploadResponse) *devkitv1.FileCreateResponse {
-	return &devkitv1.FileCreateResponse{
+func (a *PublicAdapter) FileCreateResponseGrpcFromSupa(resp *storage_go.FileUploadResponse) *talv1.FileCreateResponse {
+	return &talv1.FileCreateResponse{
 		Path: resp.Key,
 	}
 }
 
-func convertMetadata(meta interface{}) *devkitv1.FileMetadata {
+func convertMetadata(meta interface{}) *talv1.FileMetadata {
 	if meta == nil {
 		return nil
 	}
@@ -34,7 +34,7 @@ func convertMetadata(meta interface{}) *devkitv1.FileMetadata {
 		return nil
 	}
 
-	return &devkitv1.FileMetadata{
+	return &talv1.FileMetadata{
 		ETag:           db.StringFindFromMap(metaMap, "eTag"),
 		Mimetype:       db.StringFindFromMap(metaMap, "mimetype"),
 		CacheControl:   db.StringFindFromMap(metaMap, "cacheControl"),
@@ -44,9 +44,9 @@ func convertMetadata(meta interface{}) *devkitv1.FileMetadata {
 		ContentLength:  db.Int32FindFromMap(metaMap, "contentLength"),
 	}
 }
-func (a *PublicAdapter) FileObjectGrpcFromSupa(resp *storage_go.FileObject) *devkitv1.FileObject {
+func (a *PublicAdapter) FileObjectGrpcFromSupa(resp *storage_go.FileObject) *talv1.FileObject {
 	log.Debug().Interface("buck is", resp.BucketId).Msg("bucucucuuc")
-	return &devkitv1.FileObject{
+	return &talv1.FileObject{
 		Name:      fmt.Sprintf("%s/%s", resp.BucketId, resp.Name),
 		UpdatedAt: resp.UpdatedAt,
 		BucketId:  resp.BucketId,
@@ -56,27 +56,27 @@ func (a *PublicAdapter) FileObjectGrpcFromSupa(resp *storage_go.FileObject) *dev
 	}
 }
 
-func (a *PublicAdapter) FileDeleteGrpcFromSupa(resp []storage_go.FileUploadResponse) *devkitv1.FileDeleteResponse {
-	response := make([]*devkitv1.FileCreateResponse, len(resp))
+func (a *PublicAdapter) FileDeleteGrpcFromSupa(resp []storage_go.FileUploadResponse) *talv1.FileDeleteResponse {
+	response := make([]*talv1.FileCreateResponse, len(resp))
 	for index, rec := range resp {
 		response[index] = a.FileCreateResponseGrpcFromSupa(&rec)
 	}
-	return &devkitv1.FileDeleteResponse{
+	return &talv1.FileDeleteResponse{
 		Responses: response,
 	}
 }
-func (a *PublicAdapter) FileListGrpcFromSupa(resp []storage_go.FileObject, bucketId string) *devkitv1.FileListResponse {
-	files := make([]*devkitv1.FileObject, len(resp))
+func (a *PublicAdapter) FileListGrpcFromSupa(resp []storage_go.FileObject, bucketId string) *talv1.FileListResponse {
+	files := make([]*talv1.FileObject, len(resp))
 	for index, rec := range resp {
 		rec.BucketId = bucketId
 		files[index] = a.FileObjectGrpcFromSupa(&rec)
 	}
-	return &devkitv1.FileListResponse{Files: files}
+	return &talv1.FileListResponse{Files: files}
 }
-func (a *PublicAdapter) BucketListGrpcFromSupa(resp []storage_go.Bucket) *devkitv1.BucketListResponse {
-	buckets := make([]*devkitv1.StorageBucket, len(resp))
+func (a *PublicAdapter) BucketListGrpcFromSupa(resp []storage_go.Bucket) *talv1.BucketListResponse {
+	buckets := make([]*talv1.StorageBucket, len(resp))
 	for index, rec := range resp {
 		buckets[index] = a.StorageBucketGrpcFromSupa(&rec)
 	}
-	return &devkitv1.BucketListResponse{Buckets: buckets}
+	return &talv1.BucketListResponse{Buckets: buckets}
 }

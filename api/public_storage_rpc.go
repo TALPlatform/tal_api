@@ -5,10 +5,10 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 )
 
-func (api *Api) FileDelete(ctx context.Context, req *connect.Request[devkitv1.FileDeleteRequest]) (*connect.Response[devkitv1.FileDeleteResponse], error) {
+func (api *Api) FileDelete(ctx context.Context, req *connect.Request[talv1.FileDeleteRequest]) (*connect.Response[talv1.FileDeleteResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -16,14 +16,14 @@ func (api *Api) FileDelete(ctx context.Context, req *connect.Request[devkitv1.Fi
 	return connect.NewResponse(response), err
 }
 
-func (api *Api) FileDeleteByBucket(ctx context.Context, req *connect.Request[devkitv1.FileDeleteByBucketRequest]) (*connect.Response[devkitv1.FileDeleteByBucketResponse], error) {
+func (api *Api) FileDeleteByBucket(ctx context.Context, req *connect.Request[talv1.FileDeleteByBucketRequest]) (*connect.Response[talv1.FileDeleteByBucketResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 	response, err := api.publicUsecase.FileDeleteByBucket(ctx, req.Msg)
 	return connect.NewResponse(response), err
 }
-func (api *Api) GalleryList(ctx context.Context, req *connect.Request[devkitv1.GalleryListRequest]) (*connect.Response[devkitv1.GalleryListResponse], error) {
+func (api *Api) GalleryList(ctx context.Context, req *connect.Request[talv1.GalleryListRequest]) (*connect.Response[talv1.GalleryListResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -33,14 +33,14 @@ func (api *Api) GalleryList(ctx context.Context, req *connect.Request[devkitv1.G
 	response.Options.UpdateHandler = nil
 	return connect.NewResponse(response), err
 }
-func (api *Api) FileList(ctx context.Context, req *connect.Request[devkitv1.FileListRequest]) (*connect.Response[devkitv1.FileListResponse], error) {
+func (api *Api) FileList(ctx context.Context, req *connect.Request[talv1.FileListRequest]) (*connect.Response[talv1.FileListResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 	response, err := api.publicUsecase.FileList(ctx, req.Msg)
 	return connect.NewResponse(response), err
 }
-func (api *Api) BucketCreateUpdate(ctx context.Context, req *connect.Request[devkitv1.BucketCreateUpdateRequest]) (*connect.Response[devkitv1.BucketCreateUpdateResponse], error) {
+func (api *Api) BucketCreateUpdate(ctx context.Context, req *connect.Request[talv1.BucketCreateUpdateRequest]) (*connect.Response[talv1.BucketCreateUpdateResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -48,7 +48,7 @@ func (api *Api) BucketCreateUpdate(ctx context.Context, req *connect.Request[dev
 	return connect.NewResponse(response), err
 }
 
-func (api *Api) BucketList(ctx context.Context, req *connect.Request[devkitv1.BucketListRequest]) (*connect.Response[devkitv1.BucketListResponse], error) {
+func (api *Api) BucketList(ctx context.Context, req *connect.Request[talv1.BucketListRequest]) (*connect.Response[talv1.BucketListResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -56,7 +56,7 @@ func (api *Api) BucketList(ctx context.Context, req *connect.Request[devkitv1.Bu
 	return connect.NewResponse(response), err
 }
 
-func (api *Api) FileUploadUrlFind(ctx context.Context, req *connect.Request[devkitv1.FileUploadUrlFindRequest]) (*connect.Response[devkitv1.FileUploadUrlFindResponse], error) {
+func (api *Api) FileUploadUrlFind(ctx context.Context, req *connect.Request[talv1.FileUploadUrlFindRequest]) (*connect.Response[talv1.FileUploadUrlFindResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -70,7 +70,7 @@ func (api *Api) FileUploadUrlFind(ctx context.Context, req *connect.Request[devk
 	api.WithCookie(resp, api.config.SupabaseRefreshTokenCookieName, response.RefreshToken, maxAge)
 	return resp, nil
 }
-func (api *Api) FileCreate(ctx context.Context, req *connect.Request[devkitv1.FileCreateRequest]) (*connect.Response[devkitv1.FileCreateResponse], error) {
+func (api *Api) FileCreate(ctx context.Context, req *connect.Request[talv1.FileCreateRequest]) (*connect.Response[talv1.FileCreateResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -81,7 +81,7 @@ func (api *Api) FileCreate(ctx context.Context, req *connect.Request[devkitv1.Fi
 	return connect.NewResponse(resp), nil
 }
 
-func (api *Api) FileCreateBulk(ctx context.Context, req *connect.Request[devkitv1.FileCreateBulkRequest]) (*connect.Response[devkitv1.FileCreateBulkResponse], error) {
+func (api *Api) FileCreateBulk(ctx context.Context, req *connect.Request[talv1.FileCreateBulkRequest]) (*connect.Response[talv1.FileCreateBulkResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -92,7 +92,7 @@ func (api *Api) FileCreateBulk(ctx context.Context, req *connect.Request[devkitv
 	return connect.NewResponse(resp), nil
 }
 
-func (api *Api) ImportTable(ctx context.Context, req *connect.Request[devkitv1.ImportTableRequest]) (*connect.Response[devkitv1.ImportTableResponse], error) {
+func (api *Api) ImportTable(ctx context.Context, req *connect.Request[talv1.ImportTableRequest]) (*connect.Response[talv1.ImportTableResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -101,7 +101,7 @@ func (api *Api) ImportTable(ctx context.Context, req *connect.Request[devkitv1.I
 	if err != nil {
 		return nil, err
 	}
-	return connect.NewResponse(&devkitv1.ImportTableResponse{
+	return connect.NewResponse(&talv1.ImportTableResponse{
 		Message: "imported",
 	}), nil
 }

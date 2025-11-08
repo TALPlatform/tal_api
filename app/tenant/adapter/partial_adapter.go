@@ -4,19 +4,19 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/darwishdev/devkit-api/db"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/db"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 	"github.com/rs/zerolog/log"
 )
 
-func (a *TenantAdapter) PartialEntityGrpcFromSql(resp *db.TenantsSchemaPartial) *devkitv1.TenantsSchemaPartial {
+func (a *TenantAdapter) PartialEntityGrpcFromSql(resp *db.TenantsSchemaPartial) *talv1.TenantsSchemaPartial {
 	var partialLinks map[string]string
 	if len(resp.PartialLinks) > 0 {
 		if err := json.Unmarshal(resp.PartialLinks, &partialLinks); err == nil {
 			log.Error().Err(err).Msg("error parsing partial links")
 		}
 	}
-	return &devkitv1.TenantsSchemaPartial{
+	return &talv1.TenantsSchemaPartial{
 		PartialId:            int32(resp.PartialID),
 		PartialName:          resp.PartialName,
 		PartialNameAr:        resp.PartialNameAr.String,
@@ -46,8 +46,8 @@ func (a *TenantAdapter) PartialEntityGrpcFromSql(resp *db.TenantsSchemaPartial) 
 	}
 }
 
-func (a *TenantAdapter) PartialEntityListGrpcFromSql(resp *[]db.TenantsSchemaPartial) *[]*devkitv1.TenantsSchemaPartial {
-	records := make([]*devkitv1.TenantsSchemaPartial, 0)
+func (a *TenantAdapter) PartialEntityListGrpcFromSql(resp *[]db.TenantsSchemaPartial) *[]*talv1.TenantsSchemaPartial {
+	records := make([]*talv1.TenantsSchemaPartial, 0)
 	for _, v := range *resp {
 		record := a.PartialEntityGrpcFromSql(&v)
 		records = append(records, record)
@@ -55,9 +55,9 @@ func (a *TenantAdapter) PartialEntityListGrpcFromSql(resp *[]db.TenantsSchemaPar
 	return &records
 }
 
-func (a *TenantAdapter) PartialListGrpcFromSql(resp *[]db.TenantsSchemaPartial) *devkitv1.PartialListResponse {
-	records := make([]*devkitv1.TenantsSchemaPartial, 0)
-	deletedRecords := make([]*devkitv1.TenantsSchemaPartial, 0)
+func (a *TenantAdapter) PartialListGrpcFromSql(resp *[]db.TenantsSchemaPartial) *talv1.PartialListResponse {
+	records := make([]*talv1.TenantsSchemaPartial, 0)
+	deletedRecords := make([]*talv1.TenantsSchemaPartial, 0)
 	for _, v := range *resp {
 		record := a.PartialEntityGrpcFromSql(&v)
 		if v.DeletedAt.Valid {
@@ -66,13 +66,13 @@ func (a *TenantAdapter) PartialListGrpcFromSql(resp *[]db.TenantsSchemaPartial) 
 			records = append(records, record)
 		}
 	}
-	return &devkitv1.PartialListResponse{
+	return &talv1.PartialListResponse{
 		DeletedRecords: deletedRecords,
 		Records:        records,
 	}
 }
 
-func (a *TenantAdapter) PartialCreateUpdateSqlFromGrpc(req *devkitv1.PartialCreateUpdateRequest) *db.PartialCreateUpdateParams {
+func (a *TenantAdapter) PartialCreateUpdateSqlFromGrpc(req *talv1.PartialCreateUpdateRequest) *db.PartialCreateUpdateParams {
 	return &db.PartialCreateUpdateParams{
 		PartialID:            req.GetPartialId(),
 		PartialName:          req.GetPartialName(),
@@ -98,9 +98,9 @@ func (a *TenantAdapter) PartialCreateUpdateSqlFromGrpc(req *devkitv1.PartialCrea
 	}
 }
 
-func (a *TenantAdapter) PartialFindForUpdateGrpcFromSql(resp *db.TenantsSchemaPartial) *devkitv1.PartialFindForUpdateResponse {
-	return &devkitv1.PartialFindForUpdateResponse{
-		Request: &devkitv1.PartialCreateUpdateRequest{
+func (a *TenantAdapter) PartialFindForUpdateGrpcFromSql(resp *db.TenantsSchemaPartial) *talv1.PartialFindForUpdateResponse {
+	return &talv1.PartialFindForUpdateResponse{
+		Request: &talv1.PartialCreateUpdateRequest{
 			PartialId:            int32(resp.PartialID),
 			PartialName:          resp.PartialName,
 			PartialNameAr:        resp.PartialNameAr.String,
@@ -126,15 +126,15 @@ func (a *TenantAdapter) PartialFindForUpdateGrpcFromSql(resp *db.TenantsSchemaPa
 
 }
 
-func (a *TenantAdapter) PartialTypeListInputGrpcFromSql(resp []db.PartialTypeListInputRow) *devkitv1.PartialTypeListInputResponse {
-	records := make([]*devkitv1.SelectInputOption, 0)
+func (a *TenantAdapter) PartialTypeListInputGrpcFromSql(resp []db.PartialTypeListInputRow) *talv1.PartialTypeListInputResponse {
+	records := make([]*talv1.SelectInputOption, 0)
 	for _, v := range resp {
-		records = append(records, &devkitv1.SelectInputOption{
+		records = append(records, &talv1.SelectInputOption{
 			Value: v.Value,
 			Label: v.Label,
 		})
 	}
-	return &devkitv1.PartialTypeListInputResponse{
+	return &talv1.PartialTypeListInputResponse{
 		Options: records,
 	}
 

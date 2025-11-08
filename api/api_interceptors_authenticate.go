@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	"connectrpc.com/connect"
-	"github.com/darwishdev/devkit-api/pkg/auth"
-	"github.com/darwishdev/devkit-api/pkg/contextkeys"
-	"github.com/darwishdev/devkit-api/pkg/headerkeys"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/pkg/auth"
+	"github.com/TALPlatform/tal_api/pkg/contextkeys"
+	"github.com/TALPlatform/tal_api/pkg/headerkeys"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 	"github.com/iancoleman/strcase"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/protobuf/proto"
@@ -115,17 +115,17 @@ func (s *Server) NewAuthenticationInterceptor() connect.UnaryInterceptorFunc {
 
 			procedureName, group := s.proccessProcedureName(req.Spec().Procedure)
 			if options != nil {
-				skipAuth, ok := proto.GetExtension(options, devkitv1.E_SkipAuthentication).(bool)
+				skipAuth, ok := proto.GetExtension(options, talv1.E_SkipAuthentication).(bool)
 				if skipAuth && ok {
 					return next(ctx, req)
 				}
 
-				permissionGroup, ok := proto.GetExtension(options, devkitv1.E_PermissionGroup).(string)
+				permissionGroup, ok := proto.GetExtension(options, talv1.E_PermissionGroup).(string)
 				if permissionGroup != "" && ok {
 					group = permissionGroup
 				}
 
-				permissionName, ok := proto.GetExtension(options, devkitv1.E_PermissionName).(string)
+				permissionName, ok := proto.GetExtension(options, talv1.E_PermissionName).(string)
 				if permissionName != "" && ok {
 					procedureName = permissionName
 				}
@@ -145,7 +145,7 @@ func (s *Server) NewAuthenticationInterceptor() connect.UnaryInterceptorFunc {
 				// Inject the callerID into the context
 				ctx = contextkeys.WithCallerID(ctx, payload.UserId)
 
-				skipAuthorization, ok := proto.GetExtension(options, devkitv1.E_SkipAuthorization).(bool)
+				skipAuthorization, ok := proto.GetExtension(options, talv1.E_SkipAuthorization).(bool)
 				if skipAuthorization && ok {
 					return next(ctx, req)
 				}

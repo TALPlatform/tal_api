@@ -574,7 +574,7 @@ BEGIN
     -- Step 2: Only proceed if the URL was found.
     IF base_url IS NOT NULL THEN
       -- Construct the full URL.
-      full_url := base_url || '/devkit.v1.DevkitService/CommandPalleteSync';
+      full_url := base_url || '/tal.v1.TalService/CommandPalleteSync';
 
       -- Build the JSON payload based on the trigger operation.
       IF TG_OP = 'DELETE' THEN

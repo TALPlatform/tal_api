@@ -11,11 +11,11 @@ import (
 	"time"
 
 	"github.com/bufbuild/protovalidate-go"
-	"github.com/darwishdev/devkit-api/api"
-	"github.com/darwishdev/devkit-api/config"
-	"github.com/darwishdev/devkit-api/db"
-	"github.com/darwishdev/devkit-api/pkg/auth"
-	"github.com/darwishdev/devkit-api/pkg/redisclient"
+	"github.com/TALPlatform/tal_api/api"
+	"github.com/TALPlatform/tal_api/config"
+	"github.com/TALPlatform/tal_api/db"
+	"github.com/TALPlatform/tal_api/pkg/auth"
+	"github.com/TALPlatform/tal_api/pkg/redisclient"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )

@@ -1,0 +1,109 @@
+syntax = "proto3";
+import "buf/validate/validate.proto";
+package tal.v1;
+
+// message yourmessage {
+// }
+// INJECT MESSAGES  
+
+
+message SourcingSessionCreateUpdateRequest {
+  int32 sourcing_session_id = 1;
+  string sourcing_session_name = 2 [(buf.validate.field).string.min_len = 1];
+  string initial_filters = 3; 
+  int32 sourcing_project_id = 4;
+}
+
+message SourcingSessionCreateUpdateResponse {
+  int32 sourcing_session_id = 1;
+  string sourcing_session_name = 2;
+  string initial_filters = 3;
+  int32 sourcing_project_id = 4;
+  int32 created_by = 5;
+  string created_at = 6; 
+  string updated_at = 7; 
+  string deleted_at = 8; 
+}
+
+message SourcingSessionFindRequest {
+  int32 sourcing_session_id = 3 [(buf.validate.field).int32.gt = 0];
+}
+
+message SourcingSessionProfile {
+  int32 sourcing_session_id = 1;
+  int32 raw_profile_id = 2;
+  int32 score = 3;
+  int32 order_index = 4;
+  string note = 5;
+  string report_summary = 6;
+  bool is_short_listed = 7;
+  repeated string summary_bullets = 8;
+  string justification = 9;
+  RawProfileDetails profile = 10;
+}
+
+message RawProfileDetails {
+  int32 person_id = 1;
+  string name = 2;
+  string headline = 3;
+  string location = 4;
+  string current_title = 5;
+  string current_company = 6;
+  string industry = 7;
+  string summary = 8;
+  repeated string skills = 9;
+  string years_of_experience = 10;
+  int32 num_of_connections = 11;
+  string profile_picture_url = 12;
+  string linkedin_profile_url = 13;
+}
+message SourcingSessionFindResponse {
+  // Session fields
+  int32 sourcing_session_id = 1;
+  string sourcing_session_name = 2;
+  string initial_filters = 3; // JSON string
+  string session_created_at = 4; 
+  string session_updated_at = 5; 
+  string session_deleted_at = 6; 
+  
+  // Project fields
+  int32 sourcing_project_id = 7;
+  string sourcing_project_name = 8;
+  string sourcing_project_breif = 9;
+  int32 tenant_id = 10;
+  string project_created_at = 11; 
+  string project_updated_at = 12; 
+  string project_deleted_at = 13; 
+  
+  // Creator fields
+  int32 created_by = 14;
+  string creator_name = 15;
+  string creator_email = 16;
+  
+  // Profiles array
+  repeated SourcingSessionProfile profiles = 17;
+}
+
+message SourcingSessionProfileCreateUpdateRequest {
+  int32 sourcing_session_id = 1 [(buf.validate.field).int32.gt = 0];
+  int32 raw_profile_id = 2 [(buf.validate.field).int32.gt = 0];
+  int32 score = 3;
+  int32 order_index = 4;
+  string note = 5;
+  string report_summary = 6;
+  bool is_short_listed = 7;
+  repeated string summary_bullets = 8;
+  string justification = 9;
+}
+
+message SourcingSessionProfileCreateUpdateResponse {
+  int32 sourcing_session_id = 1;
+  int32 raw_profile_id = 2;
+  int32 score = 3;
+  int32 order_index = 4;
+  string note = 5;
+  string report_summary = 6;
+  bool is_short_listed = 7;
+  repeated string summary_bullets = 8;
+  string justification = 9;
+}

@@ -3,12 +3,12 @@ package adapter
 import (
 	"strings"
 
-	"github.com/darwishdev/devkit-api/db"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/db"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 )
 
-func (a *TenantAdapter) PageEntityGrpcFromSql(resp *db.TenantsSchemaPage) *devkitv1.TenantsSchemaPage {
-	return &devkitv1.TenantsSchemaPage{
+func (a *TenantAdapter) PageEntityGrpcFromSql(resp *db.TenantsSchemaPage) *talv1.TenantsSchemaPage {
+	return &talv1.TenantsSchemaPage{
 		PageId:              int32(resp.PageID),
 		PageName:            resp.PageName,
 		PageNameAr:          resp.PageNameAr.String,
@@ -28,17 +28,17 @@ func (a *TenantAdapter) PageEntityGrpcFromSql(resp *db.TenantsSchemaPage) *devki
 	}
 }
 
-func (a *TenantAdapter) PageEntityListGrpcFromSql(resp *[]db.TenantsSchemaPage) *[]*devkitv1.TenantsSchemaPage {
-	records := make([]*devkitv1.TenantsSchemaPage, 0)
+func (a *TenantAdapter) PageEntityListGrpcFromSql(resp *[]db.TenantsSchemaPage) *[]*talv1.TenantsSchemaPage {
+	records := make([]*talv1.TenantsSchemaPage, 0)
 	for _, v := range *resp {
 		record := a.PageEntityGrpcFromSql(&v)
 		records = append(records, record)
 	}
 	return &records
 }
-func (a *TenantAdapter) PageListGrpcFromSql(resp *[]db.TenantsSchemaPage) *devkitv1.PageListResponse {
-	records := make([]*devkitv1.TenantsSchemaPage, 0)
-	deletedRecords := make([]*devkitv1.TenantsSchemaPage, 0)
+func (a *TenantAdapter) PageListGrpcFromSql(resp *[]db.TenantsSchemaPage) *talv1.PageListResponse {
+	records := make([]*talv1.TenantsSchemaPage, 0)
+	deletedRecords := make([]*talv1.TenantsSchemaPage, 0)
 	for _, v := range *resp {
 		record := a.PageEntityGrpcFromSql(&v)
 		if v.DeletedAt.Valid {
@@ -47,13 +47,13 @@ func (a *TenantAdapter) PageListGrpcFromSql(resp *[]db.TenantsSchemaPage) *devki
 			records = append(records, record)
 		}
 	}
-	return &devkitv1.PageListResponse{
+	return &talv1.PageListResponse{
 		DeletedRecords: deletedRecords,
 		Records:        records,
 	}
 }
 
-func (a *TenantAdapter) PageCreateUpdateSqlFromGrpc(req *devkitv1.PageCreateUpdateRequest) *db.PageCreateUpdateParams {
+func (a *TenantAdapter) PageCreateUpdateSqlFromGrpc(req *talv1.PageCreateUpdateRequest) *db.PageCreateUpdateParams {
 	return &db.PageCreateUpdateParams{
 		PageID:              req.GetPageId(),
 		PageName:            req.GetPageName(),
@@ -71,9 +71,9 @@ func (a *TenantAdapter) PageCreateUpdateSqlFromGrpc(req *devkitv1.PageCreateUpda
 	}
 }
 
-func (a *TenantAdapter) PageFindForUpdateGrpcFromSql(resp *db.TenantsSchemaPage) *devkitv1.PageFindForUpdateResponse {
-	return &devkitv1.PageFindForUpdateResponse{
-		Request: &devkitv1.PageCreateUpdateRequest{
+func (a *TenantAdapter) PageFindForUpdateGrpcFromSql(resp *db.TenantsSchemaPage) *talv1.PageFindForUpdateResponse {
+	return &talv1.PageFindForUpdateResponse{
+		Request: &talv1.PageCreateUpdateRequest{
 			PageId:              int32(resp.PageID),
 			PageName:            resp.PageName,
 			PageNameAr:          resp.PageNameAr.String,

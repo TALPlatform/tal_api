@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/darwishdev/devkit-api/pkg/random"
+	"github.com/TALPlatform/tal_api/pkg/random"
 )
 
 var (
@@ -12,7 +12,7 @@ var (
 
 // func TestUploadFile(t *testing.T) {
 
-// 	loginRequest := connect.NewRequest(&devkitv1.AuthLoginRequest{
+// 	loginRequest := connect.NewRequest(&talv1.AuthLoginRequest{
 // 		LoginCode:    "admin@devkit.com",
 // 		UserPassword: "123456",
 // 	})
@@ -26,7 +26,7 @@ var (
 // 	if err != nil {
 // 		panic(err)
 // 	}
-// 	request := connect.NewRequest(&devkitv1.FileCreateRequest{
+// 	request := connect.NewRequest(&talv1.FileCreateRequest{
 // 		Path:       "img.webp",
 // 		BucketName: testBucket,
 // 		FileType:   "image/webp",
@@ -49,8 +49,8 @@ var (
 // 	if err != nil {
 // 		panic(err)
 // 	}
-// 	request := connect.NewRequest(&devkitv1.FileCreateBulkRequest{
-// 		Files: []*devkitv1.FileCreateRequest{{
+// 	request := connect.NewRequest(&talv1.FileCreateBulkRequest{
+// 		Files: []*talv1.FileCreateRequest{{
 // 			Path:       "initial/img2.webp",
 // 			BucketName: testBucket,
 // 			FileType:   "image/webp",

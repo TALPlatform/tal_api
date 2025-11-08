@@ -3,8 +3,8 @@ package repo
 import (
 	"context"
 
-	"github.com/darwishdev/devkit-api/db"
-	"github.com/darwishdev/devkit-api/pkg/contextkeys"
+	"github.com/TALPlatform/tal_api/db"
+	"github.com/TALPlatform/tal_api/pkg/contextkeys"
 )
 
 func (repo *TenantRepo) PartialList(ctx context.Context, tenantId int32) (*[]db.TenantsSchemaPartial, error) {

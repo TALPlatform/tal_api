@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/darwishdev/devkit-api/db"
+	"github.com/TALPlatform/tal_api/db"
 )
 
 func (r *RedisClient) DeleteAllTenants(ctx context.Context) error {

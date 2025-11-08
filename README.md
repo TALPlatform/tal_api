@@ -113,8 +113,8 @@ create table accounts_schema.users(
 ```protobuf
 syntax = "proto3";
 
-package devkit.v1;
-service DevkitService {
+package tal.v1;
+service TalService {
   // INJECT METHODS
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -227,11 +227,11 @@ Here's an example of how an endpoint is created in devkit-api, using the "List U
 * **app/accounts/adapter/users_adapter.go:**
 
     ```go
-    func (a *AccountsAdapter) UserEntityGrpcFromSql(resp *db.AccountsSchemaUser) *devkitv1.AccountsSchemaUser {
+    func (a *AccountsAdapter) UserEntityGrpcFromSql(resp *db.AccountsSchemaUser) *talv1.AccountsSchemaUser {
         // ... (code to transform database response to gRPC response)
     }
 
-    func (a *AccountsAdapter) UsersListGrpcFromSql(resp []db.AccountsSchemaUser) *devkitv1.UsersListResponse {
+    func (a *AccountsAdapter) UsersListGrpcFromSql(resp []db.AccountsSchemaUser) *talv1.UsersListResponse {
         // ... (code to transform a list of database responses to gRPC response)
     }
     ```

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/darwishdev/devkit-api/db"
+	"github.com/TALPlatform/tal_api/db"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -44,6 +44,7 @@ type RedisClientInterface interface {
 	AuthSessionDeleteByUserAgent(ctx context.Context, userID int32, userAgent string) error
 	AuthSessionClearAll(ctx context.Context, userID int32) error
 
+	GetClient() *redis.Client
 	TenantCreate(ctx context.Context, tenantId int32, tenant *db.TenantFindRow) (*db.TenantFindRow, error)
 	DeleteAllTenants(ctx context.Context) error
 	TenantDelete(ctx context.Context, tenantId int32) error
@@ -68,4 +69,7 @@ func NewRedisClient(host string, port string, password string, db int, isDisable
 		client:     client,
 		isDisabled: isDisabled,
 	}
+}
+func (r *RedisClient) GetClient() *redis.Client {
+	return r.client
 }

@@ -1,0 +1,16 @@
+[
+  {
+    "text_source_keys": [
+      "name",
+      "headline",
+      "current_title",
+      "current_company",
+      "location",
+      "industry",
+      "summary"
+    ],
+    "source_column_name": "embedding_source_text",
+    "embedding_column": "full_profile_embedding",
+    "dimensions": 1536
+  }
+]

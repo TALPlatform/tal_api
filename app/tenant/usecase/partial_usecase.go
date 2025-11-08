@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
-	"github.com/darwishdev/devkit-api/db"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/db"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 	"github.com/rs/zerolog/log"
 )
 
-func (u *TenantUsecase) PartialList(ctx context.Context, req *connect.Request[devkitv1.PartialListRequest]) (*devkitv1.PartialListResponse, error) {
+func (u *TenantUsecase) PartialList(ctx context.Context, req *connect.Request[talv1.PartialListRequest]) (*talv1.PartialListResponse, error) {
 	record, err := u.repo.PartialList(ctx, 0)
 	if err != nil {
 		return nil, err
@@ -19,7 +19,7 @@ func (u *TenantUsecase) PartialList(ctx context.Context, req *connect.Request[de
 
 }
 
-func (u *TenantUsecase) PartialCreateUpdate(ctx context.Context, req *connect.Request[devkitv1.PartialCreateUpdateRequest]) (*devkitv1.PartialCreateUpdateResponse, error) {
+func (u *TenantUsecase) PartialCreateUpdate(ctx context.Context, req *connect.Request[talv1.PartialCreateUpdateRequest]) (*talv1.PartialCreateUpdateResponse, error) {
 	sqlReq := u.adapter.PartialCreateUpdateSqlFromGrpc(req.Msg)
 	record, err := u.repo.PartialCreateUpdate(ctx, sqlReq)
 	if err != nil {
@@ -31,11 +31,11 @@ func (u *TenantUsecase) PartialCreateUpdate(ctx context.Context, req *connect.Re
 		log.Error().Str("message", "clear cache failed :").Err(err).Msg("Cache Clear Failed")
 	}
 	resp := u.adapter.PartialEntityGrpcFromSql(record)
-	return &devkitv1.PartialCreateUpdateResponse{Record: resp}, nil
+	return &talv1.PartialCreateUpdateResponse{Record: resp}, nil
 
 }
 
-func (u *TenantUsecase) PartialDeleteRestore(ctx context.Context, req *connect.Request[devkitv1.PartialDeleteRestoreRequest]) (*devkitv1.PartialDeleteRestoreResponse, error) {
+func (u *TenantUsecase) PartialDeleteRestore(ctx context.Context, req *connect.Request[talv1.PartialDeleteRestoreRequest]) (*talv1.PartialDeleteRestoreResponse, error) {
 	record, err := u.repo.PartialDeleteRestore(ctx, &req.Msg.Records)
 	if err != nil {
 		return nil, err
@@ -46,11 +46,11 @@ func (u *TenantUsecase) PartialDeleteRestore(ctx context.Context, req *connect.R
 		log.Error().Str("message", "clear cache failed :").Err(err).Msg("Cache Clear Failed")
 	}
 	resp := u.adapter.PartialEntityListGrpcFromSql(record)
-	return &devkitv1.PartialDeleteRestoreResponse{Records: *resp}, nil
+	return &talv1.PartialDeleteRestoreResponse{Records: *resp}, nil
 
 }
 
-func (u *TenantUsecase) PartialFindForUpdate(ctx context.Context, req *connect.Request[devkitv1.PartialFindForUpdateRequest]) (*devkitv1.PartialFindForUpdateResponse, error) {
+func (u *TenantUsecase) PartialFindForUpdate(ctx context.Context, req *connect.Request[talv1.PartialFindForUpdateRequest]) (*talv1.PartialFindForUpdateResponse, error) {
 
 	record, err := u.repo.PartialFindForUpdate(ctx, &db.PartialFindForUpdateParams{PartialID: req.Msg.RecordId})
 
@@ -63,7 +63,7 @@ func (u *TenantUsecase) PartialFindForUpdate(ctx context.Context, req *connect.R
 
 }
 
-func (u *TenantUsecase) PartialTypeListInput(ctx context.Context, req *connect.Request[devkitv1.PartialTypeListInputRequest]) (*devkitv1.PartialTypeListInputResponse, error) {
+func (u *TenantUsecase) PartialTypeListInput(ctx context.Context, req *connect.Request[talv1.PartialTypeListInputRequest]) (*talv1.PartialTypeListInputResponse, error) {
 	record, err := u.repo.PartialTypeListInput(ctx)
 
 	if err != nil {

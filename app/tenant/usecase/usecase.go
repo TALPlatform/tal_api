@@ -4,45 +4,45 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
-	"github.com/darwishdev/devkit-api/app/tenant/adapter"
-	"github.com/darwishdev/devkit-api/app/tenant/repo"
-	"github.com/darwishdev/devkit-api/db"
-	"github.com/darwishdev/devkit-api/pkg/redisclient"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/app/tenant/adapter"
+	"github.com/TALPlatform/tal_api/app/tenant/repo"
+	"github.com/TALPlatform/tal_api/db"
+	"github.com/TALPlatform/tal_api/pkg/redisclient"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 )
 
 type TenantUsecaseInterface interface {
 	// INJECT INTERFACE
 
-	SectionListInpt(ctx context.Context, req *connect.Request[devkitv1.SectionListInptRequest]) (*devkitv1.SectionListInptResponse, error)
+	SectionListInpt(ctx context.Context, req *connect.Request[talv1.SectionListInptRequest]) (*talv1.SectionListInptResponse, error)
 
-	PartialTypeListInput(ctx context.Context, req *connect.Request[devkitv1.PartialTypeListInputRequest]) (*devkitv1.PartialTypeListInputResponse, error)
+	PartialTypeListInput(ctx context.Context, req *connect.Request[talv1.PartialTypeListInputRequest]) (*talv1.PartialTypeListInputResponse, error)
 
-	PartialDeleteRestore(ctx context.Context, req *connect.Request[devkitv1.PartialDeleteRestoreRequest]) (*devkitv1.PartialDeleteRestoreResponse, error)
-	PartialCreateUpdate(ctx context.Context, req *connect.Request[devkitv1.PartialCreateUpdateRequest]) (*devkitv1.PartialCreateUpdateResponse, error)
-	PartialList(ctx context.Context, req *connect.Request[devkitv1.PartialListRequest]) (*devkitv1.PartialListResponse, error)
+	PartialDeleteRestore(ctx context.Context, req *connect.Request[talv1.PartialDeleteRestoreRequest]) (*talv1.PartialDeleteRestoreResponse, error)
+	PartialCreateUpdate(ctx context.Context, req *connect.Request[talv1.PartialCreateUpdateRequest]) (*talv1.PartialCreateUpdateResponse, error)
+	PartialList(ctx context.Context, req *connect.Request[talv1.PartialListRequest]) (*talv1.PartialListResponse, error)
 
-	PartialFindForUpdate(ctx context.Context, req *connect.Request[devkitv1.PartialFindForUpdateRequest]) (*devkitv1.PartialFindForUpdateResponse, error)
+	PartialFindForUpdate(ctx context.Context, req *connect.Request[talv1.PartialFindForUpdateRequest]) (*talv1.PartialFindForUpdateResponse, error)
 
-	PageFindForUpdate(ctx context.Context, req *connect.Request[devkitv1.PageFindForUpdateRequest]) (*devkitv1.PageFindForUpdateResponse, error)
+	PageFindForUpdate(ctx context.Context, req *connect.Request[talv1.PageFindForUpdateRequest]) (*talv1.PageFindForUpdateResponse, error)
 
-	SectionFindForUpdate(ctx context.Context, req *connect.Request[devkitv1.SectionFindForUpdateRequest]) (*devkitv1.SectionFindForUpdateResponse, error)
-	SectionDeleteRestore(ctx context.Context, req *connect.Request[devkitv1.SectionDeleteRestoreRequest]) (*devkitv1.SectionDeleteRestoreResponse, error)
-	SectionCreateUpdate(ctx context.Context, req *connect.Request[devkitv1.SectionCreateUpdateRequest]) (*devkitv1.SectionCreateUpdateResponse, error)
-	SectionList(ctx context.Context, req *connect.Request[devkitv1.SectionListRequest]) (*devkitv1.SectionListResponse, error)
+	SectionFindForUpdate(ctx context.Context, req *connect.Request[talv1.SectionFindForUpdateRequest]) (*talv1.SectionFindForUpdateResponse, error)
+	SectionDeleteRestore(ctx context.Context, req *connect.Request[talv1.SectionDeleteRestoreRequest]) (*talv1.SectionDeleteRestoreResponse, error)
+	SectionCreateUpdate(ctx context.Context, req *connect.Request[talv1.SectionCreateUpdateRequest]) (*talv1.SectionCreateUpdateResponse, error)
+	SectionList(ctx context.Context, req *connect.Request[talv1.SectionListRequest]) (*talv1.SectionListResponse, error)
 
-	PageDeleteRestore(ctx context.Context, req *connect.Request[devkitv1.PageDeleteRestoreRequest]) (*devkitv1.PageDeleteRestoreResponse, error)
+	PageDeleteRestore(ctx context.Context, req *connect.Request[talv1.PageDeleteRestoreRequest]) (*talv1.PageDeleteRestoreResponse, error)
 
-	PageCreateUpdate(ctx context.Context, req *connect.Request[devkitv1.PageCreateUpdateRequest]) (*devkitv1.PageCreateUpdateResponse, error)
+	PageCreateUpdate(ctx context.Context, req *connect.Request[talv1.PageCreateUpdateRequest]) (*talv1.PageCreateUpdateResponse, error)
 
-	PageList(ctx context.Context, req *connect.Request[devkitv1.PageListRequest]) (*devkitv1.PageListResponse, error)
+	PageList(ctx context.Context, req *connect.Request[talv1.PageListRequest]) (*talv1.PageListResponse, error)
 
-	TenantDeleteRestore(ctx context.Context, req *connect.Request[devkitv1.TenantDeleteRestoreRequest]) (*devkitv1.TenantDeleteRestoreResponse, error)
-	TenantList(ctx context.Context, req *connect.Request[devkitv1.TenantListRequest]) (*devkitv1.TenantListResponse, error)
-	TenantListInput(ctx context.Context, req *connect.Request[devkitv1.TenantListInputRequest]) (*devkitv1.TenantListInputResponse, error)
-	TenantFind(ctx context.Context, req *connect.Request[devkitv1.TenantFindRequest]) (*devkitv1.TenantFindResponse, error)
-	TenantCreateUpdate(ctx context.Context, req *connect.Request[devkitv1.TenantCreateUpdateRequest]) (*devkitv1.TenantCreateUpdateResponse, error)
-	TenantDashboard(ctx context.Context, req *connect.Request[devkitv1.TenantDashboardRequest]) (*devkitv1.TenantDashboardResponse, error)
+	TenantDeleteRestore(ctx context.Context, req *connect.Request[talv1.TenantDeleteRestoreRequest]) (*talv1.TenantDeleteRestoreResponse, error)
+	TenantList(ctx context.Context, req *connect.Request[talv1.TenantListRequest]) (*talv1.TenantListResponse, error)
+	TenantListInput(ctx context.Context, req *connect.Request[talv1.TenantListInputRequest]) (*talv1.TenantListInputResponse, error)
+	TenantFind(ctx context.Context, req *connect.Request[talv1.TenantFindRequest]) (*talv1.TenantFindResponse, error)
+	TenantCreateUpdate(ctx context.Context, req *connect.Request[talv1.TenantCreateUpdateRequest]) (*talv1.TenantCreateUpdateResponse, error)
+	TenantDashboard(ctx context.Context, req *connect.Request[talv1.TenantDashboardRequest]) (*talv1.TenantDashboardResponse, error)
 }
 type TenantUsecase struct {
 	store       db.Store

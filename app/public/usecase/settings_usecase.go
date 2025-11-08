@@ -2,10 +2,10 @@ package usecase
 
 import (
 	"context"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 )
 
-func (s *PublicUsecase) SettingUpdate(ctx context.Context, req *devkitv1.SettingUpdateRequest) error {
+func (s *PublicUsecase) SettingUpdate(ctx context.Context, req *talv1.SettingUpdateRequest) error {
 	params := s.adapter.SettingUpdateSqlFromGrpc(req)
 	err := s.repo.SettingUpdate(ctx, params)
 	if err != nil {
@@ -15,7 +15,7 @@ func (s *PublicUsecase) SettingUpdate(ctx context.Context, req *devkitv1.Setting
 
 }
 
-func (u *PublicUsecase) SettingFindForUpdate(ctx context.Context, req *devkitv1.SettingFindForUpdateRequest) (*devkitv1.SettingFindForUpdateResponse, error) {
+func (u *PublicUsecase) SettingFindForUpdate(ctx context.Context, req *talv1.SettingFindForUpdateRequest) (*talv1.SettingFindForUpdateResponse, error) {
 	settings, err := u.repo.SettingFindForUpdate(ctx)
 
 	if err != nil {

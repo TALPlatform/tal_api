@@ -1,13 +1,13 @@
 package adapter
 
 import (
-	"github.com/darwishdev/devkit-api/db"
-	"github.com/darwishdev/devkit-api/pkg/dateutils"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/db"
+	"github.com/TALPlatform/tal_api/pkg/dateutils"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 )
 
-func (a *AccountsAdapter) RoleFindForUpdateUpdateGrpcFromSql(resp *db.RoleFindForUpdateRow) *devkitv1.RoleCreateUpdateRequest {
-	return &devkitv1.RoleCreateUpdateRequest{
+func (a *AccountsAdapter) RoleFindForUpdateUpdateGrpcFromSql(resp *db.RoleFindForUpdateRow) *talv1.RoleCreateUpdateRequest {
+	return &talv1.RoleCreateUpdateRequest{
 		RoleId:            resp.RoleID,
 		RoleSecurityLevel: resp.RoleSecurityLevel,
 		TenantId:          resp.TenantID.Int32,
@@ -16,21 +16,21 @@ func (a *AccountsAdapter) RoleFindForUpdateUpdateGrpcFromSql(resp *db.RoleFindFo
 		Permissions:       resp.Permissions,
 	}
 }
-func (a *AccountsAdapter) RoleListInputGrpcFromSql(resp *[]db.RoleListInputRow) *devkitv1.RoleListInputResponse {
-	records := make([]*devkitv1.SelectInputOption, 0)
+func (a *AccountsAdapter) RoleListInputGrpcFromSql(resp *[]db.RoleListInputRow) *talv1.RoleListInputResponse {
+	records := make([]*talv1.SelectInputOption, 0)
 	for _, v := range *resp {
-		records = append(records, &devkitv1.SelectInputOption{
+		records = append(records, &talv1.SelectInputOption{
 			Value: v.Value,
 			Note:  v.Note,
 			Label: v.Label,
 		})
 	}
-	return &devkitv1.RoleListInputResponse{
+	return &talv1.RoleListInputResponse{
 		Options: records,
 	}
 }
-func (a *AccountsAdapter) RoleEntityGrpcFromSql(resp *db.AccountsSchemaRole) *devkitv1.AccountsSchemaRole {
-	return &devkitv1.AccountsSchemaRole{
+func (a *AccountsAdapter) RoleEntityGrpcFromSql(resp *db.AccountsSchemaRole) *talv1.AccountsSchemaRole {
+	return &talv1.AccountsSchemaRole{
 		RoleId:          int32(resp.RoleID),
 		RoleName:        resp.RoleName,
 		TenantId:        resp.TenantID.Int32,
@@ -40,7 +40,7 @@ func (a *AccountsAdapter) RoleEntityGrpcFromSql(resp *db.AccountsSchemaRole) *de
 	}
 }
 
-func (a *AccountsAdapter) RoleCreateUpdateSqlFromGrpc(req *devkitv1.RoleCreateUpdateRequest) *db.RoleCreateUpdateParams {
+func (a *AccountsAdapter) RoleCreateUpdateSqlFromGrpc(req *talv1.RoleCreateUpdateRequest) *db.RoleCreateUpdateParams {
 	resp := &db.RoleCreateUpdateParams{
 		RoleID:            req.RoleId,
 		TenantID:          req.TenantId,
@@ -53,8 +53,8 @@ func (a *AccountsAdapter) RoleCreateUpdateSqlFromGrpc(req *devkitv1.RoleCreateUp
 	return resp
 }
 
-func (a *AccountsAdapter) RoleListRowGrpcFromSql(resp *db.RoleListRow) *devkitv1.RoleListRow {
-	return &devkitv1.RoleListRow{
+func (a *AccountsAdapter) RoleListRowGrpcFromSql(resp *db.RoleListRow) *talv1.RoleListRow {
+	return &talv1.RoleListRow{
 		RoleId:            int32(resp.RoleID),
 		RoleName:          resp.RoleName,
 		TenantName:        resp.TenantName,
@@ -67,9 +67,9 @@ func (a *AccountsAdapter) RoleListRowGrpcFromSql(resp *db.RoleListRow) *devkitv1
 		DeletedAt:         dateutils.DateTimeToStringDigit(resp.DeletedAt.Time),
 	}
 }
-func (a *AccountsAdapter) RoleListGrpcFromSql(resp *[]db.RoleListRow) *devkitv1.RoleListResponse {
-	records := make([]*devkitv1.RoleListRow, 0)
-	deletedRecords := make([]*devkitv1.RoleListRow, 0)
+func (a *AccountsAdapter) RoleListGrpcFromSql(resp *[]db.RoleListRow) *talv1.RoleListResponse {
+	records := make([]*talv1.RoleListRow, 0)
+	deletedRecords := make([]*talv1.RoleListRow, 0)
 	for _, v := range *resp {
 		record := a.RoleListRowGrpcFromSql(&v)
 		if v.DeletedAt.Valid {
@@ -78,13 +78,13 @@ func (a *AccountsAdapter) RoleListGrpcFromSql(resp *[]db.RoleListRow) *devkitv1.
 		}
 		records = append(records, record)
 	}
-	return &devkitv1.RoleListResponse{
+	return &talv1.RoleListResponse{
 		DeletedRecords: deletedRecords,
 		Records:        records,
 	}
 }
-func (a *AccountsAdapter) RoleCreateUpdateGrpcFromSql(resp *db.AccountsSchemaRole) *devkitv1.RoleCreateUpdateResponse {
-	return &devkitv1.RoleCreateUpdateResponse{
+func (a *AccountsAdapter) RoleCreateUpdateGrpcFromSql(resp *db.AccountsSchemaRole) *talv1.RoleCreateUpdateResponse {
+	return &talv1.RoleCreateUpdateResponse{
 		Role: a.RoleEntityGrpcFromSql(resp),
 	}
 }

@@ -9,11 +9,11 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/bufbuild/protovalidate-go"
-	"github.com/darwishdev/devkit-api/config"
-	"github.com/darwishdev/devkit-api/db"
-	"github.com/darwishdev/devkit-api/pkg/auth"
-	"github.com/darwishdev/devkit-api/pkg/redisclient"
-	"github.com/darwishdev/devkit-api/proto_gen/devkit/v1/devkitv1connect"
+	"github.com/TALPlatform/tal_api/config"
+	"github.com/TALPlatform/tal_api/db"
+	"github.com/TALPlatform/tal_api/pkg/auth"
+	"github.com/TALPlatform/tal_api/pkg/redisclient"
+	"github.com/TALPlatform/tal_api/proto_gen/tal/v1/talv1connect"
 	"github.com/rs/zerolog/log"
 )
 
@@ -24,7 +24,7 @@ var (
 	validator       *protovalidate.Validator
 	isRedisDisabled bool
 	testServer      *http.Server
-	testClient      devkitv1connect.DevkitServiceClient
+	testClient      talv1connect.TalServiceClient
 	tokenMaker      auth.Maker
 )
 
@@ -43,11 +43,11 @@ func startRealServer(store db.Store) *http.Server {
 	return httpServer
 
 }
-func setupTestServer(store db.Store) (devkitv1connect.DevkitServiceClient, *http.Server) {
+func setupTestServer(store db.Store) (talv1connect.TalServiceClient, *http.Server) {
 	// Create a test HTTP server with the API handler
 	serv := startRealServer(store)
 	// Initialize a client that will connect to the test server
-	testClient := devkitv1connect.NewDevkitServiceClient(
+	testClient := talv1connect.NewTalServiceClient(
 		http.DefaultClient,
 		"http://localhost:9090",
 		connect.WithGRPC(),

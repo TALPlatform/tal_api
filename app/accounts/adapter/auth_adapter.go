@@ -6,25 +6,25 @@ import (
 	"strings"
 	"time"
 
-	"github.com/darwishdev/devkit-api/db"
-	"github.com/darwishdev/devkit-api/pkg/redisclient"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/db"
+	"github.com/TALPlatform/tal_api/pkg/redisclient"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 	"github.com/iancoleman/strcase"
 	"github.com/supabase-community/auth-go/types"
 )
 
-type NavigationsMap map[int32]*devkitv1.NavigationBarItem
+type NavigationsMap map[int32]*talv1.NavigationBarItem
 
 // The UserNavigationBarFindGrpcFromSql function builds a hierarchical structure of navigation bar items from a sorted database response (dbResponse).
 // This hierarchy supports any number of levels, as long as the input list is sorted in ascending order by level.
 // The function uses navigationBarItemId as a primary key and parentId as a foreign key to link items with their parents.
 // The function logic breakdown is listed as comments inside the function body.
-func (a *AccountsAdapter) UserNavigationBarFindGrpcFromSql(dbResponse []db.UserNavigationBarFindRow) ([]*devkitv1.NavigationBarItem, error) {
+func (a *AccountsAdapter) UserNavigationBarFindGrpcFromSql(dbResponse []db.UserNavigationBarFindRow) ([]*talv1.NavigationBarItem, error) {
 	// 1. Get the maximum level in the tree by accessing the last element in the array, since the response is sorted by level.
 	maxLevel := dbResponse[len(dbResponse)-1].Level
 
 	// 2. Declare rootItems, which will store the top-level items and serve as the function's return value.
-	rootItems := make([]*devkitv1.NavigationBarItem, 0)
+	rootItems := make([]*talv1.NavigationBarItem, 0)
 
 	// 3. Initialize levelItemsMap with empty maps. This will store each level's items separately in its own hashmap.
 	//    We populate levelItemsMap in reverse order so that the highest level appears first.
@@ -78,10 +78,10 @@ func (a *AccountsAdapter) UserNavigationBarFindGrpcFromSql(dbResponse []db.UserN
 	}
 	return rootItems, nil
 }
-func (a *AccountsAdapter) AuthSessionListGrpcFromRedis(resp []*redisclient.AuthSession) *devkitv1.AuthSessionListResponse {
-	records := make([]*devkitv1.AuthSession, 0)
+func (a *AccountsAdapter) AuthSessionListGrpcFromRedis(resp []*redisclient.AuthSession) *talv1.AuthSessionListResponse {
+	records := make([]*talv1.AuthSession, 0)
 	for _, session := range resp {
-		records = append(records, &devkitv1.AuthSession{
+		records = append(records, &talv1.AuthSession{
 			SessionKey:                    session.SessionKey,
 			TokenId:                       session.TokenID,
 			UserId:                        session.UserID,
@@ -98,12 +98,12 @@ func (a *AccountsAdapter) AuthSessionListGrpcFromRedis(resp []*redisclient.AuthS
 			SupabaseRefreshTokenExpiresAt: session.SupabaseRefreshTokenExpiresAt.Format(time.RFC3339),
 		})
 	}
-	return &devkitv1.AuthSessionListResponse{
+	return &talv1.AuthSessionListResponse{
 		Records: records,
 	}
 }
-func (a *AccountsAdapter) UserCreateUpdateRequestFromAuthRegister(req *devkitv1.AuthRegisterRequest) *devkitv1.UserCreateUpdateRequest {
-	resp := &devkitv1.UserCreateUpdateRequest{
+func (a *AccountsAdapter) UserCreateUpdateRequestFromAuthRegister(req *talv1.AuthRegisterRequest) *talv1.UserCreateUpdateRequest {
+	resp := &talv1.UserCreateUpdateRequest{
 		UserName:     req.UserName,
 		UserTypeId:   req.UserTypeId,
 		UserPhone:    req.UserPhone,
@@ -125,7 +125,7 @@ func (a *AccountsAdapter) UserPermissionsMapRedisFromSql(resp *[]db.UserPermissi
 	}
 	return &respMap, nil
 }
-func (a *AccountsAdapter) AuttSessionRedisFromGrpc(response *devkitv1.AuthLoginResponse, ipAddress string, userAgent string) (*redisclient.AuthSession, error) {
+func (a *AccountsAdapter) AuttSessionRedisFromGrpc(response *talv1.AuthLoginResponse, ipAddress string, userAgent string) (*redisclient.AuthSession, error) {
 	supabaseAccessExpiredAt, err := db.StringToTime(response.LoginInfo.SupabaseTokenExpiresAt)
 	supabaseRefreshExpiredAt, err := db.StringToTime(response.LoginInfo.SupabaseRefreshTokenExpiresAt)
 	accessTokenExpiredAt, err := db.StringToTime(response.LoginInfo.AccessTokenExpiresAt)
@@ -148,7 +148,7 @@ func (a *AccountsAdapter) AuttSessionRedisFromGrpc(response *devkitv1.AuthLoginR
 		SupabaseRefreshToken:          response.LoginInfo.SupabaseRefreshToken,
 	}, nil
 }
-func (a *AccountsAdapter) AuthLoginSqlFromGrpc(req *devkitv1.AuthLoginRequest) (*db.UserFindForAuthParams, *types.TokenRequest) {
+func (a *AccountsAdapter) AuthLoginSqlFromGrpc(req *talv1.AuthLoginRequest) (*db.UserFindForAuthParams, *types.TokenRequest) {
 	isEmail := strings.Contains(req.LoginCode, "@") && strings.Contains(req.LoginCode, ".")
 	supabseRequest := &types.TokenRequest{Password: req.UserPassword}
 	normalizedCode := strings.ToLower(strings.TrimSpace(req.LoginCode))
@@ -163,16 +163,16 @@ func (a *AccountsAdapter) AuthLoginSqlFromGrpc(req *devkitv1.AuthLoginRequest) (
 	}, supabseRequest
 }
 
-func (a *AccountsAdapter) AuthLoginGrpcFromSql(resp *db.AccountsSchemaUserView) *devkitv1.AuthLoginResponse {
-	return &devkitv1.AuthLoginResponse{
+func (a *AccountsAdapter) AuthLoginGrpcFromSql(resp *db.AccountsSchemaUserView) *talv1.AuthLoginResponse {
+	return &talv1.AuthLoginResponse{
 		User: a.UserViewEntityGrpcFromSql(resp),
 	}
 }
-func (a *AccountsAdapter) NavigationBarItemGrpcFromSql(resp *db.UserNavigationBarFindRow) *devkitv1.NavigationBarItem {
+func (a *AccountsAdapter) NavigationBarItemGrpcFromSql(resp *db.UserNavigationBarFindRow) *talv1.NavigationBarItem {
 	if !resp.LabelAr.Valid {
 		resp.LabelAr.String = resp.Label
 	}
-	return &devkitv1.NavigationBarItem{
+	return &talv1.NavigationBarItem{
 		Key:                 resp.MenuKey,
 		Level:               resp.Level,
 		NavigationBarItemId: resp.NavigationBarItemID,
@@ -184,7 +184,7 @@ func (a *AccountsAdapter) NavigationBarItemGrpcFromSql(resp *db.UserNavigationBa
 	}
 }
 
-func (a *AccountsAdapter) AuthResetPasswordSupaFromGrpc(req *devkitv1.AuthResetPasswordRequest) *types.VerifyForUserRequest {
+func (a *AccountsAdapter) AuthResetPasswordSupaFromGrpc(req *talv1.AuthResetPasswordRequest) *types.VerifyForUserRequest {
 	return &types.VerifyForUserRequest{
 		Type:       types.VerificationTypeRecovery,
 		Token:      req.ResetToken,

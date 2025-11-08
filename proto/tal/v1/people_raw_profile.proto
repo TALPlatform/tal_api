@@ -1,0 +1,37 @@
+syntax = "proto3";
+package tal.v1;
+message RawProfileListRequest {
+  string query = 1;                      
+  repeated float embedding = 2;          
+  repeated string industries = 3;        
+  repeated string locations = 4;         
+  repeated string skills = 5;            
+  repeated string companies = 6;         
+  repeated string projects = 7;          
+  int32 sourcing_session_id = 9;                       
+  int32 limit = 8;                       
+}
+
+message RawProfileListRow {
+  int64 person_id = 1;
+  string name = 2;
+  string headline = 3;
+  string location = 4;
+  string current_title = 5;
+  string current_company = 6;
+  string industry = 7;
+  string summary = 8;
+  string years_of_experience = 9;
+  int32 num_of_connections = 10;
+  string profile_picture_url = 11;
+  string linkedin_profile_url = 12;
+  repeated string skills = 13;
+  float semantic_score = 14;
+  float text_rank = 15;
+  float hybrid_score = 16;
+}
+message RawProfileListResponse {
+  repeated RawProfileListRow records = 1;      // List of returned profiles
+}
+
+

@@ -1,0 +1,15 @@
+syntax = "proto3";
+import "tal/v1/client.proto";
+package tal.v1;
+
+// message yourmessage {
+// }
+// INJECT MESSAGES  
+
+message ProjectInputListRequest {
+}
+
+message ProjectInputListResponse {
+  repeated SelectInputOption options = 1;
+}
+

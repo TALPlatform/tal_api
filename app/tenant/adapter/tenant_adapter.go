@@ -4,41 +4,41 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/darwishdev/devkit-api/db"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/db"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 	"github.com/rs/zerolog/log"
 )
 
-func (a *TenantAdapter) TenantDashboardGrpcFromSql(resp *[]db.TenantDashboardRow) *devkitv1.TenantDashboardResponse {
-	partialByType := make([]*devkitv1.PartialByType, len(*resp))
-	counts := &devkitv1.TenantDashboardCounts{}
+func (a *TenantAdapter) TenantDashboardGrpcFromSql(resp *[]db.TenantDashboardRow) *talv1.TenantDashboardResponse {
+	partialByType := make([]*talv1.PartialByType, len(*resp))
+	counts := &talv1.TenantDashboardCounts{}
 	for i, r := range *resp {
 		if i == 0 {
-			counts.RoleCount = &devkitv1.CountCard{
+			counts.RoleCount = &talv1.CountCard{
 				Link:  "/accounts/role",
 				Count: int32(r.RoleCount),
 			}
-			counts.UserCount = &devkitv1.CountCard{
+			counts.UserCount = &talv1.CountCard{
 				Link:  "/accounts/user",
 				Count: int32(r.UserCount),
 			}
-			counts.SectionCount = &devkitv1.CountCard{
+			counts.SectionCount = &talv1.CountCard{
 				Link:  "/tenants/section",
 				Count: int32(r.SectionCount),
 			}
-			counts.TenantCount = &devkitv1.CountCard{
+			counts.TenantCount = &talv1.CountCard{
 				Link:  "/tenants/tenant",
 				Count: int32(r.TenantCount),
 			}
 		}
-		partialByType[i] = &devkitv1.PartialByType{PartialTypeId: r.PartialTypeID, PartialTypeName: r.PartialTypeName, PartialCount: int32(r.PartialTypeCount)}
+		partialByType[i] = &talv1.PartialByType{PartialTypeId: r.PartialTypeID, PartialTypeName: r.PartialTypeName, PartialCount: int32(r.PartialTypeCount)}
 	}
-	return &devkitv1.TenantDashboardResponse{
+	return &talv1.TenantDashboardResponse{
 		Counts:        counts,
 		PartialByType: partialByType,
 	}
 }
-func (a *TenantAdapter) TenantEntityGrpcFromSql(resp *db.TenantsSchemaTenant) *devkitv1.TenantsSchemaTenant {
+func (a *TenantAdapter) TenantEntityGrpcFromSql(resp *db.TenantsSchemaTenant) *talv1.TenantsSchemaTenant {
 	var tenantLinks map[string]string
 	log.Debug().Interface("tenant links is", resp.TenantLinks).Msg("links is")
 	if len(resp.TenantLinks) > 0 {
@@ -47,7 +47,7 @@ func (a *TenantAdapter) TenantEntityGrpcFromSql(resp *db.TenantsSchemaTenant) *d
 		}
 	}
 
-	return &devkitv1.TenantsSchemaTenant{
+	return &talv1.TenantsSchemaTenant{
 		TenantId:               int32(resp.TenantID),
 		TenantName:             resp.TenantName,
 		TenantNameAr:           resp.TenantNameAr.String,
@@ -70,7 +70,7 @@ func (a *TenantAdapter) TenantEntityGrpcFromSql(resp *db.TenantsSchemaTenant) *d
 	}
 }
 
-func (a *TenantAdapter) TenantCreateUpdateSqlFromGrpc(req *devkitv1.TenantCreateUpdateRequest) *db.TenantCreateUpdateParams {
+func (a *TenantAdapter) TenantCreateUpdateSqlFromGrpc(req *talv1.TenantCreateUpdateRequest) *db.TenantCreateUpdateParams {
 	tenantLinks, err := json.Marshal(req.GetTenantLinks())
 	if err != nil {
 		log.Error().Err(err).Msg("error parsing partial links")
@@ -97,9 +97,9 @@ func (a *TenantAdapter) TenantCreateUpdateSqlFromGrpc(req *devkitv1.TenantCreate
 	}
 	return resp
 }
-func (a *TenantAdapter) TenantListGrpcFromSql(resp *[]db.TenantsSchemaTenant) *devkitv1.TenantListResponse {
-	records := make([]*devkitv1.TenantsSchemaTenant, 0)
-	deletedRecords := make([]*devkitv1.TenantsSchemaTenant, 0)
+func (a *TenantAdapter) TenantListGrpcFromSql(resp *[]db.TenantsSchemaTenant) *talv1.TenantListResponse {
+	records := make([]*talv1.TenantsSchemaTenant, 0)
+	deletedRecords := make([]*talv1.TenantsSchemaTenant, 0)
 	for _, v := range *resp {
 		record := a.TenantEntityGrpcFromSql(&v)
 		if v.DeletedAt.Valid {
@@ -108,14 +108,14 @@ func (a *TenantAdapter) TenantListGrpcFromSql(resp *[]db.TenantsSchemaTenant) *d
 			records = append(records, record)
 		}
 	}
-	return &devkitv1.TenantListResponse{
+	return &talv1.TenantListResponse{
 		DeletedRecords: deletedRecords,
 		Records:        records,
 	}
 }
-func (a *TenantAdapter) TenantFindGrpcFromSql(resp *db.TenantFindRow) *devkitv1.TenantFindResponse {
+func (a *TenantAdapter) TenantFindGrpcFromSql(resp *db.TenantFindRow) *talv1.TenantFindResponse {
 
-	var navigations []*devkitv1.NavigationBar
+	var navigations []*talv1.NavigationBar
 	var tenantLinks map[string]string
 	if len(resp.TenantLinks) > 0 {
 		if err := json.Unmarshal(resp.TenantLinks, &tenantLinks); err == nil {
@@ -129,13 +129,13 @@ func (a *TenantAdapter) TenantFindGrpcFromSql(resp *db.TenantFindRow) *devkitv1.
 		err := json.Unmarshal(resp.Navigations, &navigations)
 		log.Error().Err(err).Msg("error parsing the navigations")
 	}
-	var pages []*devkitv1.TenantsSchemaPageView
+	var pages []*talv1.TenantsSchemaPageView
 	if len(resp.Pages) > 0 {
 		err := json.Unmarshal(resp.Pages, &pages)
 		log.Error().Err(err).Msg("error parsing the pages")
 	}
-	return &devkitv1.TenantFindResponse{
-		Tenant: &devkitv1.TenantsSchemaTenantView{
+	return &talv1.TenantFindResponse{
+		Tenant: &talv1.TenantsSchemaTenantView{
 			TenantId:               resp.TenantID,
 			TenantName:             resp.TenantName,
 			TenantNameAr:           resp.TenantNameAr.String,
@@ -161,27 +161,27 @@ func (a *TenantAdapter) TenantFindGrpcFromSql(resp *db.TenantFindRow) *devkitv1.
 		},
 	}
 }
-func (a *TenantAdapter) TenantDeleteRestoreGrpcFromSql(resp *[]db.TenantsSchemaTenant) *devkitv1.TenantDeleteRestoreResponse {
-	records := make([]*devkitv1.TenantsSchemaTenant, 0)
+func (a *TenantAdapter) TenantDeleteRestoreGrpcFromSql(resp *[]db.TenantsSchemaTenant) *talv1.TenantDeleteRestoreResponse {
+	records := make([]*talv1.TenantsSchemaTenant, 0)
 	for _, v := range *resp {
 		record := a.TenantEntityGrpcFromSql(&v)
 		records = append(records, record)
 	}
-	return &devkitv1.TenantDeleteRestoreResponse{
+	return &talv1.TenantDeleteRestoreResponse{
 		Records: records,
 	}
 
 }
 
-func (a *TenantAdapter) TenantListInputGrpcFromSql(resp *[]db.TenantListInputRow) *devkitv1.TenantListInputResponse {
-	records := make([]*devkitv1.SelectInputOption, 0)
+func (a *TenantAdapter) TenantListInputGrpcFromSql(resp *[]db.TenantListInputRow) *talv1.TenantListInputResponse {
+	records := make([]*talv1.SelectInputOption, 0)
 	for _, v := range *resp {
-		records = append(records, &devkitv1.SelectInputOption{
+		records = append(records, &talv1.SelectInputOption{
 			Value: v.Value,
 			Label: v.Label,
 		})
 	}
-	return &devkitv1.TenantListInputResponse{
+	return &talv1.TenantListInputResponse{
 		Options: records,
 	}
 

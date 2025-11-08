@@ -1,6 +1,6 @@
 # A string used to distinguish different Supabase projects on the same host. Defaults to the
 # working directory name when running `supabase init`.
-project_id = "devkit-api"
+project_id = "tal_api"
 
 [api]
 enabled = true
@@ -99,7 +99,7 @@ site_url = "http://127.0.0.1:5174"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
 additional_redirect_urls =  [
   # existing
-  "http://localhost:9000/devkit.v1.DevkitService/UserLoginProviderCallback",
+  "http://localhost:9000/tal.v1.TalService/UserLoginProviderCallback",
   "https://127.0.0.1:5173",
   "https://127.0.0.1:5174",
   "https://127.0.0.1:5173/auth/provider-login",

@@ -1,0 +1,97 @@
+syntax = "proto3";
+package tal.v1;
+
+import "buf/validate/validate.proto";
+
+message RouteQuery {
+  string query_name = 1;
+  string query_value = 2;
+}
+message RedirectRouteParam {
+  string param_name = 1;
+  string response_value_key = 2;
+}
+message CreateHandler {
+  string title = 1;
+  string redirect_route = 2;
+  RedirectRouteParam redirect_route_param = 3;
+  string route_name = 4;
+  repeated RouteQuery route_query = 5;
+  string endpoint = 6;
+  string update_param_name = 7;
+  string param_property_name = 8;
+}
+
+message UpdateHandler {
+  string title = 1;
+  string redirect_route = 2;
+  string route_name = 3;
+  repeated RouteQuery route_query = 4;
+  string endpoint = 5;
+  string find_endpoint = 6;
+  string find_request_property = 7;
+  string find_response_property = 8;
+}
+
+message DeleteHandler {
+  string endpoint = 1;
+  string request_property = 2;
+}
+
+message DeleteRestoreHandler {
+  string endpoint = 1;
+  string request_property = 2;
+}
+message ImportHandler {
+  string endpoint = 1;
+  string import_template_link = 2;
+}
+message ErrorHandler {
+  string constraint_name = 1;
+  string field_name = 2;
+}
+message AvailableOptions {
+  string title = 1;
+  string description = 2;
+  int32 total_count = 8;
+  CreateHandler create_handler = 3;
+  UpdateHandler update_handler = 4;
+  DeleteRestoreHandler delete_restore_handler = 5;
+  DeleteHandler delete_handler = 6;
+  ImportHandler import_handler = 7;
+}
+
+message RowActions {
+  UpdateHandler update_handler = 1;
+  DeleteRestoreHandler delete_resore_handler = 2;
+}
+
+message SelectInputOption {
+  int32 value = 1;
+  string label = 2;
+  string group = 5;
+  string icon = 3;
+  string note = 4;
+}
+message SelectInputOptionWithGroup {
+  string group_icon = 1;
+  string group_name = 2;
+  repeated SelectInputOption items = 3;
+}
+message DeleteRestoreRequest {
+  repeated int32 records = 1 [(buf.validate.field).repeated = {
+    unique: true
+    max_items: 500
+  }];
+}
+
+message PaginationParams {
+  string sort_column = 1;
+  string sort_function = 2 [(buf.validate.field) = {
+    string: {pattern: "^(ASC|DESC|asc|desc)$"}
+    ignore_empty: true
+  }];
+  int32 page_number = 3;
+  bool is_deleted = 5;
+  int32 page_size = 6;
+}

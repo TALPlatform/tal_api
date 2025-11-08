@@ -6,18 +6,18 @@ import (
 	"testing"
 
 	"connectrpc.com/connect"
-	"github.com/darwishdev/devkit-api/pkg/random"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/pkg/random"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 )
 
 type roleCreateUpdateTest struct {
 	name      string
-	params    *devkitv1.RoleCreateUpdateRequest
+	params    *talv1.RoleCreateUpdateRequest
 	expectErr bool
 }
 
-func getValidRole() *devkitv1.RoleCreateUpdateRequest {
-	return &devkitv1.RoleCreateUpdateRequest{
+func getValidRole() *talv1.RoleCreateUpdateRequest {
+	return &talv1.RoleCreateUpdateRequest{
 		RoleName:          random.RandomName(),
 		RoleDescription:   random.RandomString(50),
 		RoleSecurityLevel: 1,
@@ -31,7 +31,7 @@ func TestRoleCreateUpdate(t *testing.T) {
 		// Test for a valid role creation.
 		{
 			name: "ValidRole",
-			params: &devkitv1.RoleCreateUpdateRequest{
+			params: &talv1.RoleCreateUpdateRequest{
 				RoleName:          validRole.RoleName,
 				RoleDescription:   validRole.RoleDescription,
 				RoleSecurityLevel: 1,
@@ -41,7 +41,7 @@ func TestRoleCreateUpdate(t *testing.T) {
 		},
 		{
 			name: "ValidRoleUpdate",
-			params: &devkitv1.RoleCreateUpdateRequest{
+			params: &talv1.RoleCreateUpdateRequest{
 				RoleId:            3,
 				RoleName:          "updated role name",
 				RoleSecurityLevel: 1,
@@ -53,7 +53,7 @@ func TestRoleCreateUpdate(t *testing.T) {
 
 		{
 			name: "InValidNameTooShort",
-			params: &devkitv1.RoleCreateUpdateRequest{
+			params: &talv1.RoleCreateUpdateRequest{
 				RoleName:          random.RandomString(1),
 				RoleSecurityLevel: 1,
 				RoleDescription:   validRole.RoleDescription,
@@ -63,7 +63,7 @@ func TestRoleCreateUpdate(t *testing.T) {
 		},
 		{
 			name: "InValidNameToLong",
-			params: &devkitv1.RoleCreateUpdateRequest{
+			params: &talv1.RoleCreateUpdateRequest{
 				RoleName:          random.RandomString(220),
 				RoleSecurityLevel: 1,
 				RoleDescription:   validRole.RoleDescription,
@@ -73,7 +73,7 @@ func TestRoleCreateUpdate(t *testing.T) {
 		},
 		{
 			name: "InValidDescriptionToLong",
-			params: &devkitv1.RoleCreateUpdateRequest{
+			params: &talv1.RoleCreateUpdateRequest{
 				RoleName:          random.RandomString(120),
 				RoleSecurityLevel: 1,
 				RoleDescription:   random.RandomString(220),
@@ -84,7 +84,7 @@ func TestRoleCreateUpdate(t *testing.T) {
 
 		{
 			name: "InvalideDuplicatedPermissions",
-			params: &devkitv1.RoleCreateUpdateRequest{
+			params: &talv1.RoleCreateUpdateRequest{
 				RoleName:          random.RandomString(120),
 				RoleDescription:   random.RandomString(22),
 				RoleSecurityLevel: 1,
@@ -100,7 +100,7 @@ func TestRoleCreateUpdate(t *testing.T) {
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
 			roleReq := connect.NewRequest(tc.params)
-			loginResp, err := testClient.AuthLogin(ctx, connect.NewRequest(&devkitv1.AuthLoginRequest{LoginCode: "admin@devkit.com", UserPassword: "123456"}))
+			loginResp, err := testClient.AuthLogin(ctx, connect.NewRequest(&talv1.AuthLoginRequest{LoginCode: "admin@devkit.com", UserPassword: "123456"}))
 			roleReq.Header().Add("Authorization", fmt.Sprintf("bearer %s", loginResp.Msg.LoginInfo.AccessToken))
 			_, err = testClient.RoleCreateUpdate(context.Background(), roleReq)
 			// If the current test case expects an error and no error occurred, fail the test

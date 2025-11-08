@@ -1,39 +1,39 @@
 package adapter
 
 import (
-	"github.com/darwishdev/devkit-api/db"
-	"github.com/darwishdev/devkit-api/pkg/redisclient"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/db"
+	"github.com/TALPlatform/tal_api/pkg/redisclient"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 	"github.com/supabase-community/auth-go/types"
 )
 
 type AccountsAdapterInterface interface {
 	UserPermissionsMapRedisFromSql(resp *[]db.UserPermissionsMapRow) (*redisclient.PermissionsMap, error)
-	AuttSessionRedisFromGrpc(response *devkitv1.AuthLoginResponse, ipAddress string, userAgent string) (*redisclient.AuthSession, error)
-	AuthLoginSqlFromGrpc(req *devkitv1.AuthLoginRequest) (*db.UserFindForAuthParams, *types.TokenRequest)
-	UserCreateUpdateRequestFromAuthRegister(req *devkitv1.AuthRegisterRequest) *devkitv1.UserCreateUpdateRequest
-	AuthSessionListGrpcFromRedis(resp []*redisclient.AuthSession) *devkitv1.AuthSessionListResponse
-	AuthResetPasswordSupaFromGrpc(req *devkitv1.AuthResetPasswordRequest) *types.VerifyForUserRequest
-	AuthLoginGrpcFromSql(resp *db.AccountsSchemaUserView) *devkitv1.AuthLoginResponse
-	UserNavigationBarFindGrpcFromSql(dbResponse []db.UserNavigationBarFindRow) ([]*devkitv1.NavigationBarItem, error)
-	UserCreateUpdateGrpcFromSql(resp *db.AccountsSchemaUser) *devkitv1.UserCreateUpdateResponse
-	UserFindRowGrpcFromSql(resp *db.UserFindRow) *devkitv1.UserFindRow
-	UserSessionsGrpcFropmSql(sessions []*redisclient.AuthSession) []*devkitv1.UserSession
-	UserFindForUpdateUpdateGrpcFromSql(resp *db.UserFindForUpdateRow) *devkitv1.UserCreateUpdateRequest
-	UserTypeListInputGrpcFromSql(resp *[]db.UserTypeListInputRow) *devkitv1.UserTypeListInputResponse
-	UserPermissionListInputGrpcFromSql(resp *[]db.UserPermissionListInputRow) *devkitv1.UserPermissionListInputResponse
-	UserListInputGrpcFromSql(resp *[]db.UserListInputRow) *devkitv1.UserListInputResponse
-	NavigationBarItemGrpcFromSql(resp *db.UserNavigationBarFindRow) *devkitv1.NavigationBarItem
-	UserListGrpcFromSql(resp *[]db.AccountsSchemaUserView) *devkitv1.UserListResponse
-	UserCreateUpdateSqlFromGrpc(req *devkitv1.UserCreateUpdateRequest) *db.UserCreateUpdateParams
-	UserViewEntityGrpcFromSql(resp *db.AccountsSchemaUserView) *devkitv1.AccountsSchemaUserView
-	UserEntityGrpcFromSql(resp *db.AccountsSchemaUser) *devkitv1.AccountsSchemaUser
-	RoleFindForUpdateUpdateGrpcFromSql(resp *db.RoleFindForUpdateRow) *devkitv1.RoleCreateUpdateRequest
-	RoleListInputGrpcFromSql(resp *[]db.RoleListInputRow) *devkitv1.RoleListInputResponse
-	RoleListGrpcFromSql(resp *[]db.RoleListRow) *devkitv1.RoleListResponse
-	RoleEntityGrpcFromSql(resp *db.AccountsSchemaRole) *devkitv1.AccountsSchemaRole
-	RoleCreateUpdateSqlFromGrpc(req *devkitv1.RoleCreateUpdateRequest) *db.RoleCreateUpdateParams
-	RoleCreateUpdateGrpcFromSql(resp *db.AccountsSchemaRole) *devkitv1.RoleCreateUpdateResponse
+	AuttSessionRedisFromGrpc(response *talv1.AuthLoginResponse, ipAddress string, userAgent string) (*redisclient.AuthSession, error)
+	AuthLoginSqlFromGrpc(req *talv1.AuthLoginRequest) (*db.UserFindForAuthParams, *types.TokenRequest)
+	UserCreateUpdateRequestFromAuthRegister(req *talv1.AuthRegisterRequest) *talv1.UserCreateUpdateRequest
+	AuthSessionListGrpcFromRedis(resp []*redisclient.AuthSession) *talv1.AuthSessionListResponse
+	AuthResetPasswordSupaFromGrpc(req *talv1.AuthResetPasswordRequest) *types.VerifyForUserRequest
+	AuthLoginGrpcFromSql(resp *db.AccountsSchemaUserView) *talv1.AuthLoginResponse
+	UserNavigationBarFindGrpcFromSql(dbResponse []db.UserNavigationBarFindRow) ([]*talv1.NavigationBarItem, error)
+	UserCreateUpdateGrpcFromSql(resp *db.AccountsSchemaUser) *talv1.UserCreateUpdateResponse
+	UserFindRowGrpcFromSql(resp *db.UserFindRow) *talv1.UserFindRow
+	UserSessionsGrpcFropmSql(sessions []*redisclient.AuthSession) []*talv1.UserSession
+	UserFindForUpdateUpdateGrpcFromSql(resp *db.UserFindForUpdateRow) *talv1.UserCreateUpdateRequest
+	UserTypeListInputGrpcFromSql(resp *[]db.UserTypeListInputRow) *talv1.UserTypeListInputResponse
+	UserPermissionListInputGrpcFromSql(resp *[]db.UserPermissionListInputRow) *talv1.UserPermissionListInputResponse
+	UserListInputGrpcFromSql(resp *[]db.UserListInputRow) *talv1.UserListInputResponse
+	NavigationBarItemGrpcFromSql(resp *db.UserNavigationBarFindRow) *talv1.NavigationBarItem
+	UserListGrpcFromSql(resp *[]db.AccountsSchemaUserView) *talv1.UserListResponse
+	UserCreateUpdateSqlFromGrpc(req *talv1.UserCreateUpdateRequest) *db.UserCreateUpdateParams
+	UserViewEntityGrpcFromSql(resp *db.AccountsSchemaUserView) *talv1.AccountsSchemaUserView
+	UserEntityGrpcFromSql(resp *db.AccountsSchemaUser) *talv1.AccountsSchemaUser
+	RoleFindForUpdateUpdateGrpcFromSql(resp *db.RoleFindForUpdateRow) *talv1.RoleCreateUpdateRequest
+	RoleListInputGrpcFromSql(resp *[]db.RoleListInputRow) *talv1.RoleListInputResponse
+	RoleListGrpcFromSql(resp *[]db.RoleListRow) *talv1.RoleListResponse
+	RoleEntityGrpcFromSql(resp *db.AccountsSchemaRole) *talv1.AccountsSchemaRole
+	RoleCreateUpdateSqlFromGrpc(req *talv1.RoleCreateUpdateRequest) *db.RoleCreateUpdateParams
+	RoleCreateUpdateGrpcFromSql(resp *db.AccountsSchemaRole) *talv1.RoleCreateUpdateResponse
 }
 
 type AccountsAdapter struct {

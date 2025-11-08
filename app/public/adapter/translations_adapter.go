@@ -1,11 +1,11 @@
 package adapter
 
 import (
-	"github.com/darwishdev/devkit-api/db"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/db"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 )
 
-func (a *PublicAdapter) TranslationCreateUpdateBulkSqlFromGrpc(req *devkitv1.TranslationCreateUpdateBulkRequest) *db.TranslationCreateUpdateBulkParams {
+func (a *PublicAdapter) TranslationCreateUpdateBulkSqlFromGrpc(req *talv1.TranslationCreateUpdateBulkRequest) *db.TranslationCreateUpdateBulkParams {
 	keys := make([]string, len(req.Records))
 	enValues := make([]string, len(req.Records))
 	arValues := make([]string, len(req.Records))
@@ -21,41 +21,41 @@ func (a *PublicAdapter) TranslationCreateUpdateBulkSqlFromGrpc(req *devkitv1.Tra
 	}
 }
 
-func (a *PublicAdapter) TranslationCreateUpdateBulkRowGrpcFromSql(resp *db.TranslationCreateUpdateBulkRow) *devkitv1.Translation {
-	return &devkitv1.Translation{
+func (a *PublicAdapter) TranslationCreateUpdateBulkRowGrpcFromSql(resp *db.TranslationCreateUpdateBulkRow) *talv1.Translation {
+	return &talv1.Translation{
 		TranslationKey: resp.TranslationKey,
 		EnglishValue:   resp.EnglishValue,
 		ArabicValue:    resp.ArabicValue,
 	}
 }
 
-func (a *PublicAdapter) TranslationGrpcFromSql(resp *db.Translation) *devkitv1.Translation {
-	return &devkitv1.Translation{
+func (a *PublicAdapter) TranslationGrpcFromSql(resp *db.Translation) *talv1.Translation {
+	return &talv1.Translation{
 		TranslationKey: resp.TranslationKey,
 		EnglishValue:   resp.EnglishValue,
 		ArabicValue:    resp.ArabicValue,
 	}
 }
 
-func (a *PublicAdapter) TranslationCreateUpdateBulkGrpcFromSql(resp []db.TranslationCreateUpdateBulkRow) devkitv1.TranslationListResponse {
-	translations := make([]*devkitv1.Translation, len(resp))
+func (a *PublicAdapter) TranslationCreateUpdateBulkGrpcFromSql(resp []db.TranslationCreateUpdateBulkRow) talv1.TranslationListResponse {
+	translations := make([]*talv1.Translation, len(resp))
 	for index, t := range resp {
 		translations[index] = a.TranslationCreateUpdateBulkRowGrpcFromSql(&t)
 	}
-	return devkitv1.TranslationListResponse{
+	return talv1.TranslationListResponse{
 		Translations: translations,
 	}
 }
-func (a *PublicAdapter) TranslationListGrpcFromSql(resp []db.Translation) devkitv1.TranslationListResponse {
-	translations := make([]*devkitv1.Translation, len(resp))
+func (a *PublicAdapter) TranslationListGrpcFromSql(resp []db.Translation) talv1.TranslationListResponse {
+	translations := make([]*talv1.Translation, len(resp))
 	for index, t := range resp {
 		translations[index] = a.TranslationGrpcFromSql(&t)
 	}
-	return devkitv1.TranslationListResponse{
+	return talv1.TranslationListResponse{
 		Translations: translations,
 	}
 }
-func (a *PublicAdapter) TranslationFindLocaleGrpcFromSql(resp []db.Translation, locale string) devkitv1.TranslationFindLocaleResponse {
+func (a *PublicAdapter) TranslationFindLocaleGrpcFromSql(resp []db.Translation, locale string) talv1.TranslationFindLocaleResponse {
 	translations := make(map[string]string, len(resp))
 	for _, t := range resp {
 		value := t.EnglishValue
@@ -64,7 +64,7 @@ func (a *PublicAdapter) TranslationFindLocaleGrpcFromSql(resp []db.Translation, 
 		}
 		translations[t.TranslationKey] = value
 	}
-	return devkitv1.TranslationFindLocaleResponse{
+	return talv1.TranslationFindLocaleResponse{
 		Translations: translations,
 	}
 }

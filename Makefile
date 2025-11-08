@@ -13,7 +13,24 @@ include $(CURRENT_STATE_FILE)
 include config/shared.env
 
 
+raw_profile_load:
+	PGPASSWORD=postgres psql \
+  -h 127.0.0.1 \
+  -p 54322 \
+  -U postgres \
+  -d postgres \
+  < raw_profile_data.sql
 
+raw_profile_bu:
+	PGPASSWORD=postgres pg_dump \
+  -h 127.0.0.1 \
+  -p 54322 \
+  -U postgres \
+  -d postgres \
+  -t people_schema.raw_profile \
+  --data-only \
+  --column-inserts \
+  > raw_profile_data.sql
 
 mign : 
 	supabase migration new $(name)
@@ -36,6 +53,11 @@ deploy:
 seed_accounts:
 	devkit seed accounts_schema --file-path seeds/schemas/accounts.xlsx -e
 
+
+# seed_raw_profiles:
+# 	devkit seed table   --file-path ./seeds/profiles/raw_profiles_01_with_embedding.json   --function people_schema.raw_profiles_bulk_create_update   -e
+seed_sourcing:
+	devkit seed sourcing_schema --file-path ./seeds/schemas/sourcing.xlsx -e
 seed_public:
 	devkit seed public --file-path seeds/schemas/public.xlsx -e
 
@@ -77,7 +99,7 @@ refresh_vector_db:
 	curl -X DELETE http://localhost:8080/v1/schema/CommandPallete && make init_weaviate_schema
 
 rdb:
-	make supabase_reset refresh_vector_db seed_super_user seed_accounts seed_storage seed_public seed_tenants seed_tenants_accounts 
+	make raw_profile_bu supabase_reset refresh_vector_db seed_super_user seed_accounts seed_storage seed_public seed_tenants seed_tenants_accounts seed_sourcing raw_profile_load
 run:
 	go run main.go
 buf_push:
@@ -90,14 +112,14 @@ dpush:
 	docker push  exploremelon/abc_portfolio:${v}
 
 buf:
-	rm -rf proto_gen/devkit/v1/*.pb.go && cd proto && buf lint && buf generate 
+	rm -rf proto_gen/tal/v1/*.pb.go && cd proto && buf lint && buf generate 
 sqlc:
 	rm -rf db/*.sql.go && sqlc generate	
 gen:
 	buf generate && sqlc generate
 
 mock:
-	mockgen -package mockdb -destination db/mock/store.go github.com/darwishdev/devkit-api/db Store
+	mockgen -package mockdb -destination db/mock/store.go github.com/TALPlatform/tal_api/db Store
 test:
 	make mock && go test ./... -v --cover
 

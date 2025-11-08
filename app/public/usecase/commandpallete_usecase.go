@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"connectrpc.com/connect"
-	"github.com/darwishdev/devkit-api/pkg/contextkeys"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/pkg/contextkeys"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 )
-func (u *PublicUsecase) CommandPalleteSync(ctx context.Context, req *connect.Request[devkitv1.CommandPalleteSyncRequest]) (*devkitv1.CommandPalleteSyncResponse, error) {
+func (u *PublicUsecase) CommandPalleteSync(ctx context.Context, req *connect.Request[talv1.CommandPalleteSyncRequest]) (*talv1.CommandPalleteSyncResponse, error) {
 	params := u.adapter.CommandPalleteWeaviateFromGrpc(req.Msg.Record)
 	if req.Msg.TriggerType == "DELETE" {
 		err := u.weaviateClient.CommandPalleteDelete(ctx,req.Msg.Record.MenuKey)
@@ -20,19 +20,19 @@ func (u *PublicUsecase) CommandPalleteSync(ctx context.Context, req *connect.Req
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve users list: %w", err)
 	}
-	return &devkitv1.CommandPalleteSyncResponse{Message: "created"}, nil
+	return &talv1.CommandPalleteSyncResponse{Message: "created"}, nil
 }
 
-func (u *PublicUsecase) CommandPalleteSearch(ctx context.Context, req *connect.Request[devkitv1.CommandPalleteSearchRequest]) (*devkitv1.CommandPalleteSearchResponse, error) {
+func (u *PublicUsecase) CommandPalleteSearch(ctx context.Context, req *connect.Request[talv1.CommandPalleteSearchRequest]) (*talv1.CommandPalleteSearchResponse, error) {
 	tenantID , _ := contextkeys.TenantID(ctx)
 	resp, err := u.weaviateClient.CommandPaletteSearch(ctx, tenantID , req.Msg.Query , 10)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve users list: %w", err)
 	}
-	hits := make([]*devkitv1.CommandPallete , len(resp))
+	hits := make([]*talv1.CommandPallete , len(resp))
 	for index , v := range resp {
 		hits[index] =  u.adapter.CommandPalleteGrpcFromWeaviate(v)
 	}
 
-	return &devkitv1.CommandPalleteSearchResponse{Hits: hits}, nil
+	return &talv1.CommandPalleteSearchResponse{Hits: hits}, nil
 }

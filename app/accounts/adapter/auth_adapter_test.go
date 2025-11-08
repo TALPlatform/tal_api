@@ -3,14 +3,14 @@ package adapter
 import (
 	"testing"
 
-	"github.com/darwishdev/devkit-api/db"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/db"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 	"github.com/stretchr/testify/require"
 )
 
 var adapterInstance AccountsAdapterInterface = NewAccountsAdapter()
 
-func isDeepEqual(t *testing.T, item1 *devkitv1.NavigationBarItem, item2 *devkitv1.NavigationBarItem) bool {
+func isDeepEqual(t *testing.T, item1 *talv1.NavigationBarItem, item2 *talv1.NavigationBarItem) bool {
 	require.Equal(t, item1.Label, item2.Label)
 	require.Equal(t, item1.Key, item2.Key)
 	require.Equal(t, item1.Level, item2.Level)
@@ -27,7 +27,7 @@ func isDeepEqual(t *testing.T, item1 *devkitv1.NavigationBarItem, item2 *devkitv
 	}
 	return true
 }
-func executeTest(t *testing.T, req []db.UserNavigationBarFindRow, expected []*devkitv1.NavigationBarItem) {
+func executeTest(t *testing.T, req []db.UserNavigationBarFindRow, expected []*talv1.NavigationBarItem) {
 	result, err := adapterInstance.UserNavigationBarFindGrpcFromSql(req)
 	require.NoError(t, err)
 	require.Equal(t, len(expected), len(result))
@@ -41,7 +41,7 @@ func executeTest(t *testing.T, req []db.UserNavigationBarFindRow, expected []*de
 type testCase struct {
 	name     string
 	req      []db.UserNavigationBarFindRow
-	expected []*devkitv1.NavigationBarItem
+	expected []*talv1.NavigationBarItem
 }
 
 func TestUserNavigationBarFindGrpcFromSql(t *testing.T) {
@@ -58,7 +58,7 @@ func TestUserNavigationBarFindGrpcFromSql(t *testing.T) {
 					Level:               1,
 				},
 			},
-			expected: []*devkitv1.NavigationBarItem{
+			expected: []*talv1.NavigationBarItem{
 				{
 					NavigationBarItemId: 1,
 					ParentId:            0,
@@ -87,14 +87,14 @@ func TestUserNavigationBarFindGrpcFromSql(t *testing.T) {
 					Level:               2,
 				},
 			},
-			expected: []*devkitv1.NavigationBarItem{
+			expected: []*talv1.NavigationBarItem{
 				{
 					NavigationBarItemId: 1,
 					ParentId:            0,
 					Key:                 "home",
 					Label:               "Home",
 					Level:               1,
-					Items: []*devkitv1.NavigationBarItem{
+					Items: []*talv1.NavigationBarItem{
 						{
 							NavigationBarItemId: 2,
 							ParentId:            1,
@@ -131,21 +131,21 @@ func TestUserNavigationBarFindGrpcFromSql(t *testing.T) {
 					Level:               3,
 				},
 			},
-			expected: []*devkitv1.NavigationBarItem{
+			expected: []*talv1.NavigationBarItem{
 				{
 					NavigationBarItemId: 1,
 					ParentId:            0,
 					Key:                 "home",
 					Label:               "Home",
 					Level:               1,
-					Items: []*devkitv1.NavigationBarItem{
+					Items: []*talv1.NavigationBarItem{
 						{
 							NavigationBarItemId: 2,
 							ParentId:            1,
 							Key:                 "dashboard",
 							Label:               "Dashboard",
 							Level:               2,
-							Items: []*devkitv1.NavigationBarItem{
+							Items: []*talv1.NavigationBarItem{
 								{
 									NavigationBarItemId: 3,
 									ParentId:            2,
@@ -192,28 +192,28 @@ func TestUserNavigationBarFindGrpcFromSql(t *testing.T) {
 					Level:               4,
 				},
 			},
-			expected: []*devkitv1.NavigationBarItem{
+			expected: []*talv1.NavigationBarItem{
 				{
 					NavigationBarItemId: 1,
 					ParentId:            0,
 					Key:                 "home",
 					Label:               "Home",
 					Level:               1,
-					Items: []*devkitv1.NavigationBarItem{
+					Items: []*talv1.NavigationBarItem{
 						{
 							NavigationBarItemId: 2,
 							ParentId:            1,
 							Key:                 "dashboard",
 							Label:               "Dashboard",
 							Level:               2,
-							Items: []*devkitv1.NavigationBarItem{
+							Items: []*talv1.NavigationBarItem{
 								{
 									NavigationBarItemId: 3,
 									ParentId:            2,
 									Key:                 "analytics",
 									Label:               "Analytics",
 									Level:               3,
-									Items: []*devkitv1.NavigationBarItem{
+									Items: []*talv1.NavigationBarItem{
 										{
 											NavigationBarItemId: 4,
 											ParentId:            3,

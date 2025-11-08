@@ -3,10 +3,10 @@ package api
 import (
 	"connectrpc.com/connect"
 	"context"
-	"github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 )
 
-func (api *Api) EmailSend(ctx context.Context, req *connect.Request[devkitv1.EmailSendRequest]) (*connect.Response[devkitv1.EmailSendResponse], error) {
+func (api *Api) EmailSend(ctx context.Context, req *connect.Request[talv1.EmailSendRequest]) (*connect.Response[talv1.EmailSendResponse], error) {
 	if err := ctx.Err(); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}

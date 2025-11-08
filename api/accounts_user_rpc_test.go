@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"connectrpc.com/connect"
-	"github.com/darwishdev/devkit-api/pkg/random"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	"github.com/TALPlatform/tal_api/pkg/random"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,13 +17,13 @@ var (
 	userNewPassword = random.RandomString(10)
 	userPhone       = random.RandomPhone()
 	userNewPhone    = random.RandomPhone()
-	loginRequest    = connect.NewRequest(&devkitv1.AuthLoginRequest{
+	loginRequest    = connect.NewRequest(&talv1.AuthLoginRequest{
 		LoginCode:    userEmail,
 		UserPassword: userPassword,
 	})
 
-	emptyRequest      = connect.NewRequest(&devkitv1.RoleListRequest{})
-	userCreateRequest = connect.NewRequest(&devkitv1.UserCreateUpdateRequest{
+	emptyRequest      = connect.NewRequest(&talv1.RoleListRequest{})
+	userCreateRequest = connect.NewRequest(&talv1.UserCreateUpdateRequest{
 		UserId:            0,
 		UserEmail:         userEmail,
 		UserPassword:      userPassword,
@@ -43,7 +43,7 @@ func TestCycle(t *testing.T) {
 	})
 	// // // // create new user
 	t.Run("create new user with no roles", func(t *testing.T) {
-		loginResp, err := testClient.AuthLogin(ctx, connect.NewRequest(&devkitv1.AuthLoginRequest{LoginCode: "admin@devkit.com", UserPassword: "123456"}))
+		loginResp, err := testClient.AuthLogin(ctx, connect.NewRequest(&talv1.AuthLoginRequest{LoginCode: "admin@devkit.com", UserPassword: "123456"}))
 		userCreateRequest.Header().Add("Authorization", fmt.Sprintf("bearer %s", loginResp.Msg.LoginInfo.AccessToken))
 
 		resp, err := testClient.UserCreateUpdate(ctx, userCreateRequest)
@@ -57,7 +57,7 @@ func TestCycle(t *testing.T) {
 	// // // login with wrong password
 	t.Run("Login with wrong password", func(t *testing.T) {
 
-		wrongLoginRequest := connect.NewRequest(&devkitv1.AuthLoginRequest{
+		wrongLoginRequest := connect.NewRequest(&talv1.AuthLoginRequest{
 			LoginCode:    userEmail,
 			UserPassword: "wrongPassword",
 		})
@@ -102,7 +102,7 @@ func TestCycle(t *testing.T) {
 	})
 	// // try to access ednpoint that needs access
 	t.Run("forbidden access", func(t *testing.T) {
-		req := connect.NewRequest(&devkitv1.RoleListRequest{})
+		req := connect.NewRequest(&talv1.RoleListRequest{})
 		_, err := testClient.RoleList(context.Background(), req)
 		require.NotEmpty(t, err)
 	})

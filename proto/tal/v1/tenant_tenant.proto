@@ -1,0 +1,148 @@
+syntax = "proto3";
+
+package tal.v1;
+
+import "buf/validate/validate.proto";
+import "tal/v1/accounts_navigation_bar.proto";
+import "tal/v1/client.proto";
+import "tal/v1/tenant_page.proto";
+
+// message yourmessage {
+// }
+// INJECT MESSAGES
+
+// Request for creating or updating a tenant
+message TenantCreateUpdateRequest {
+  int32 tenant_id = 1;
+  string tenant_name = 2 [
+    (buf.validate.field).string.min_len = 2,
+    (buf.validate.field).string.max_len = 200
+  ]; // Unique
+  string tenant_name_ar = 3 [(buf.validate.field).string.max_len = 200];
+  string tenant_phone = 4 [(buf.validate.field).string.max_len = 200]; // Unique
+  string tenant_address = 5 [(buf.validate.field).string.max_len = 200];
+  string tenant_address_ar = 6 [(buf.validate.field).string.max_len = 200];
+  string tenant_description = 7;
+  string tenant_description_ar = 8;
+  string tenant_email = 9 [
+    (buf.validate.field).string.email = true,
+    (buf.validate.field).string.max_len = 200
+  ]; // Unique
+  string tenant_logo = 28;
+  string tenant_logo_vertical = 11;
+  string tenant_logo_dark = 12;
+  string tenant_logo_dark_vertical = 13;
+  string tenant_values = 14;
+  map<string, string> tenant_links = 18;
+  string tenant_vision = 15;
+  string tenant_mission = 16;
+}
+
+// Message representing a tenant record in the response
+message TenantsSchemaTenant {
+  int32 tenant_id = 1;
+  string tenant_name = 2;
+  string tenant_name_ar = 3;
+  string tenant_phone = 4;
+  string tenant_address = 5;
+  string tenant_address_ar = 6;
+  string tenant_description = 7;
+  string tenant_description_ar = 8;
+  string tenant_email = 9;
+  string tenant_logo = 10;
+  string tenant_logo_vertical = 11;
+  string tenant_logo_dark = 12;
+  string tenant_values = 17;
+  string tenant_vision = 18;
+  string tenant_mission = 19;
+  string tenant_logo_dark_vertical = 13;
+  map<string, string> tenant_links = 20;
+  string created_at = 14;
+  string updated_at = 15;
+  string deleted_at = 16;
+}
+message TenantsSchemaTenantView {
+  int32 tenant_id = 1;
+  string tenant_name = 2;
+  string tenant_name_ar = 3;
+  string tenant_phone = 4;
+  string tenant_address = 5;
+  string tenant_address_ar = 6;
+  string tenant_description = 7;
+  string tenant_description_ar = 8;
+  string tenant_email = 9;
+  string tenant_logo = 10;
+  string tenant_logo_vertical = 11;
+  string tenant_logo_dark = 12;
+  string tenant_values = 13;
+  string tenant_vision = 14;
+  string tenant_mission = 15;
+  string tenant_logo_dark_vertical = 16;
+  map<string, string> tenant_links = 22;
+  string created_at = 17;
+  string updated_at = 18;
+  string deleted_at = 19;
+  repeated TenantsSchemaPageView pages = 20;
+  repeated NavigationBar navigations = 21;
+}
+
+// Response for creating or updating a tenant
+message TenantCreateUpdateResponse {
+  TenantsSchemaTenant tenant = 1;
+}
+
+message TenantListRequest {}
+
+message TenantListResponse {
+  repeated TenantsSchemaTenant records = 1;
+  repeated TenantsSchemaTenant deleted_records = 2;
+  AvailableOptions options = 3;
+}
+
+message TenantListInputRequest {}
+
+message TenantListInputResponse {
+  repeated SelectInputOption options = 1;
+}
+message TenantDeleteRestoreRequest {
+  repeated int32 records = 1 [(buf.validate.field).repeated = {
+    unique: true
+    max_items: 500
+  }];
+}
+
+message TenantDeleteRestoreResponse {
+  repeated TenantsSchemaTenant records = 1;
+}
+
+message TenantFindRequest {
+  int32 tenant_id = 1 [(buf.validate.field).int32.gt = 0];
+}
+
+message TenantFindResponse {
+  TenantsSchemaTenantView tenant = 1;
+}
+message TenantDashboardRequest {
+}
+
+message CountCard {
+  int32 count = 1;
+  string link = 2;
+}
+message TenantDashboardCounts {
+  CountCard role_count = 1;
+  CountCard user_count = 2;
+  CountCard tenant_count = 3;
+  CountCard section_count = 4;
+}
+
+message PartialByType {
+  int32 partial_type_id = 1;
+  string partial_type_name = 2;
+  int32 partial_count = 3;
+}
+message TenantDashboardResponse {
+  TenantDashboardCounts  counts = 1;
+  repeated PartialByType  partial_by_type = 2;
+  PageListResponse pages = 3;
+}

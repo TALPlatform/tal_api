@@ -3,7 +3,7 @@ package repo
 import (
 	"context"
 
-	"github.com/darwishdev/devkit-api/db"
+	"github.com/TALPlatform/tal_api/db"
 )
 
 func (repo *PublicRepo) SettingUpdate(ctx context.Context, req *db.SettingUpdateParams) error {

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	"github.com/darwishdev/devkit-api/db"
-	"github.com/darwishdev/devkit-api/pkg/contextkeys"
+	"github.com/TALPlatform/tal_api/db"
+	"github.com/TALPlatform/tal_api/pkg/contextkeys"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )

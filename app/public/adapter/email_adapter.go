@@ -1,11 +1,11 @@
 package adapter
 
 import (
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 	"github.com/resend/resend-go/v2"
 )
 
-func (a *PublicAdapter) EmailSendResendFromGrpc(req *devkitv1.EmailSendRequest) resend.SendEmailRequest {
+func (a *PublicAdapter) EmailSendResendFromGrpc(req *talv1.EmailSendRequest) resend.SendEmailRequest {
 	var tags []resend.Tag
 	for _, tag := range req.Tags {
 		tags = append(tags, resend.Tag{Name: tag.Key, Value: tag.Value})

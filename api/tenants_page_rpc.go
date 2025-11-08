@@ -5,10 +5,10 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 )
 
-func (api *Api) PageList(ctx context.Context, req *connect.Request[devkitv1.PageListRequest]) (*connect.Response[devkitv1.PageListResponse], error) {
+func (api *Api) PageList(ctx context.Context, req *connect.Request[talv1.PageListRequest]) (*connect.Response[talv1.PageListResponse], error) {
 	resp, err := api.tenantUsecase.PageList(ctx, req)
 
 	if err != nil {
@@ -19,21 +19,21 @@ func (api *Api) PageList(ctx context.Context, req *connect.Request[devkitv1.Page
 	return connect.NewResponse(resp), nil
 }
 
-func (api *Api) PageCreateUpdate(ctx context.Context, req *connect.Request[devkitv1.PageCreateUpdateRequest]) (*connect.Response[devkitv1.PageCreateUpdateResponse], error) {
+func (api *Api) PageCreateUpdate(ctx context.Context, req *connect.Request[talv1.PageCreateUpdateRequest]) (*connect.Response[talv1.PageCreateUpdateResponse], error) {
 	resp, err := api.tenantUsecase.PageCreateUpdate(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 	return connect.NewResponse(resp), nil
 }
-func (api *Api) PageDeleteRestore(ctx context.Context, req *connect.Request[devkitv1.PageDeleteRestoreRequest]) (*connect.Response[devkitv1.PageDeleteRestoreResponse], error) {
+func (api *Api) PageDeleteRestore(ctx context.Context, req *connect.Request[talv1.PageDeleteRestoreRequest]) (*connect.Response[talv1.PageDeleteRestoreResponse], error) {
 	resp, err := api.tenantUsecase.PageDeleteRestore(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 	return connect.NewResponse(resp), nil
 }
-func (api *Api) PageFindForUpdate(ctx context.Context, req *connect.Request[devkitv1.PageFindForUpdateRequest]) (*connect.Response[devkitv1.PageFindForUpdateResponse], error) {
+func (api *Api) PageFindForUpdate(ctx context.Context, req *connect.Request[talv1.PageFindForUpdateRequest]) (*connect.Response[talv1.PageFindForUpdateResponse], error) {
 	resp, err := api.tenantUsecase.PageFindForUpdate(ctx, req)
 	if err != nil {
 		return nil, err

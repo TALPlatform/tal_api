@@ -3,16 +3,16 @@ package usecase
 import (
 	"context"
 
-	devkitv1 "github.com/darwishdev/devkit-api/proto_gen/devkit/v1"
+	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 )
 
-func (s *PublicUsecase) EmailSend(ctx context.Context, req *devkitv1.EmailSendRequest) (*devkitv1.EmailSendResponse, error) {
+func (s *PublicUsecase) EmailSend(ctx context.Context, req *talv1.EmailSendRequest) (*talv1.EmailSendResponse, error) {
 	params := s.adapter.EmailSendResendFromGrpc(req)
 	resp, err := s.resendClient.SendEmail(&params)
 	if err != nil {
 		return nil, err
 	}
-	return &devkitv1.EmailSendResponse{
+	return &talv1.EmailSendResponse{
 		Id: resp.Id,
 	}, nil
 
