@@ -40,6 +40,7 @@ func (api *Api) CurrentUserPermissionsMap(ctx context.Context) (redisclient.Perm
 		if err != nil {
 			return nil, connect.NewError(connect.CodeUnauthenticated, err)
 		}
+		log.Debug().Interface("permission is", permissions).Msg("permissions hey")
 		for _, rec := range permissions {
 			groupPermissions := make(map[string]bool)
 			err = json.Unmarshal(rec.Permissions, &groupPermissions)

@@ -28,7 +28,7 @@ func isDeepEqual(t *testing.T, item1 *talv1.NavigationBarItem, item2 *talv1.Navi
 	return true
 }
 func executeTest(t *testing.T, req []db.UserNavigationBarFindRow, expected []*talv1.NavigationBarItem) {
-	result, err := adapterInstance.UserNavigationBarFindGrpcFromSql(req)
+	result, err := adapterInstance.UserNavigationBarFindGrpcFromSql(req, nil)
 	require.NoError(t, err)
 	require.Equal(t, len(expected), len(result))
 	for i, acutalRecord := range result {

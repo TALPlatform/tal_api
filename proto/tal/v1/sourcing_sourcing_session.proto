@@ -1,5 +1,6 @@
 syntax = "proto3";
 import "buf/validate/validate.proto";
+import "tal/v1/client.proto";
 package tal.v1;
 
 // message yourmessage {
@@ -10,19 +11,49 @@ package tal.v1;
 message SourcingSessionCreateUpdateRequest {
   int32 sourcing_session_id = 1;
   string sourcing_session_name = 2 [(buf.validate.field).string.min_len = 1];
-  string initial_filters = 3; 
-  int32 sourcing_project_id = 4;
+  int32 min_experience = 3;
+  int32 max_experience = 4;
+  repeated string required_contact_info = 5;
+  string timezone = 6;
+  repeated string locations = 7;
+  repeated string job_titles = 8;
+  string job_seniority = 9;
+  repeated string job_functions = 10;
+  repeated string companies = 11;
+  string company_headcount = 12;
+  string company_funding = 13;
+  repeated string industries = 14;
+  repeated string keywords = 15;
+  repeated string skills = 16;
+  repeated string education_levels = 17;
+  repeated string languages = 18;
+  int32 filter_limit = 19;
+  int32 sourcing_project_id = 44;
 }
 
 message SourcingSessionCreateUpdateResponse {
   int32 sourcing_session_id = 1;
   string sourcing_session_name = 2;
-  string initial_filters = 3;
-  int32 sourcing_project_id = 4;
-  int32 created_by = 5;
-  string created_at = 6; 
-  string updated_at = 7; 
-  string deleted_at = 8; 
+  int32 min_experience = 3;
+  int32 max_experience = 4;
+  repeated string required_contact_info = 5;
+  string timezone = 6;
+  repeated string locations = 7;
+  repeated string job_titles = 8;
+  string job_seniority = 9;
+  repeated string job_functions = 10;
+  repeated string companies = 11;
+  string company_headcount = 12;
+  string company_funding = 13;
+  repeated string industries = 14;
+  repeated string keywords = 15;
+  repeated string skills = 16;
+  repeated string education_levels = 17;
+  repeated string languages = 18;
+  int32 sourcing_project_id = 44;
+  string created_at = 46; 
+  string updated_at = 57; 
+  string deleted_at = 48; 
 }
 
 message SourcingSessionFindRequest {
@@ -61,27 +92,43 @@ message SourcingSessionFindResponse {
   // Session fields
   int32 sourcing_session_id = 1;
   string sourcing_session_name = 2;
-  string initial_filters = 3; // JSON string
-  string session_created_at = 4; 
-  string session_updated_at = 5; 
-  string session_deleted_at = 6; 
-  
+  int32 min_experience = 3;
+  int32 max_experience = 4;
+  repeated string required_contact_info = 5;
+  string timezone = 6;
+  repeated string locations = 7;
+  repeated string job_titles = 8;
+  string job_seniority = 9;
+  repeated string job_functions = 10;
+  repeated string companies = 11;
+  string company_headcount = 12;
+  string company_funding = 13;
+  repeated string industries = 14;
+  repeated string keywords = 15;
+  repeated string skills = 16;
+  repeated string education_levels = 17;
+  repeated string languages = 18;
+  int32 filter_limit = 19;
+  string session_created_at = 20; 
+  string session_updated_at = 21; 
+  string session_deleted_at = 22; 
+
   // Project fields
-  int32 sourcing_project_id = 7;
-  string sourcing_project_name = 8;
-  string sourcing_project_breif = 9;
-  int32 tenant_id = 10;
-  string project_created_at = 11; 
-  string project_updated_at = 12; 
-  string project_deleted_at = 13; 
-  
+  int32 sourcing_project_id = 23;
+  string sourcing_project_name = 24;
+  string sourcing_project_breif = 25;
+  int32 tenant_id = 26;
+  string project_created_at = 27; 
+  string project_updated_at = 28; 
+  string project_deleted_at = 29; 
+
   // Creator fields
-  int32 created_by = 14;
-  string creator_name = 15;
-  string creator_email = 16;
-  
+  int32 created_by = 30;
+  string creator_name = 31;
+  string creator_email = 32;
+
   // Profiles array
-  repeated SourcingSessionProfile profiles = 17;
+  repeated SourcingSessionProfile profiles = 33;
 }
 
 message SourcingSessionProfileCreateUpdateRequest {
@@ -107,3 +154,146 @@ message SourcingSessionProfileCreateUpdateResponse {
   repeated string summary_bullets = 8;
   string justification = 9;
 }
+
+message SourcingSessionListRequest {
+}
+message SessionListRow {
+  int32 sourcing_session_id = 1;
+  string sourcing_project_name = 2;
+  string tenant_name = 3;
+  string user_name = 4;
+  string sourcing_session_name = 5;
+  int32 min_experience = 12;
+  int32 max_experience = 13;
+  repeated string required_contact_info = 14;
+  string timezone = 15;
+  repeated string locations = 16;
+  repeated string job_titles = 17;
+  string job_seniority = 18;
+  repeated string job_functions = 19;
+  repeated string companies = 20;
+  string company_headcount = 21;
+  string company_funding = 22;
+  repeated string industries = 23;
+  repeated string keywords = 24;
+  repeated string skills = 25;
+  repeated string education_levels = 26;
+  repeated string languages = 27;
+  int32 filter_limit = 28;
+  int32 sourcing_project_id = 7;
+  int32 created_by = 8;
+  string created_at = 9;
+  string updated_at = 10;
+  string deleted_at = 11;
+}
+message SourcingSessionListResponse {
+  repeated SessionListRow  records = 1;
+  AvailableOptions options = 3;
+}
+
+
+
+message SourcingSessionProfileJustifyRequest {
+  int32 sourcing_session_id = 1;
+  int32 raw_profile_id = 2;
+}
+
+message SourcingSessionProfileJustifyResponse {
+  string value = 1;
+}
+
+
+message SourcingSessionCriteriaCreateRequest {
+  int32 sourcing_session_id = 1;  // The session this criteria belongs to
+  repeated string steps = 2;      // Array of steps (TEXT[])
+}
+
+
+message CriteriaMatch {
+  string criteria = 1;
+  string justification = 2;
+
+}
+message SourcingSessionCriteriaCreateResponse {
+  int32 sourcing_session_criteria_id = 1;
+  int32 raw_profile_id = 2;
+  int32 score = 3;
+  int32 order_index = 4;
+  repeated CriteriaMatch criteria = 5;
+}
+
+
+message SourcingSessionApplyRequest {
+  int32 sourcing_session_id = 1;
+}
+
+message SourcingSessionApplyResponse {
+  int32 sourcing_session_id = 1;
+  int32 raw_profile_id = 2;
+  int32 score = 3;
+  int32 order_index = 4;
+  string note = 5;
+  string report_summary = 6;
+  bool is_short_listed = 7;
+  repeated string summary_bullets = 8;
+  string justification = 9;
+  RawProfileDetails profile = 10;
+}
+
+
+message SourcingSessionFiltersBuilderRequest {
+  int32 sourcing_session_id = 1;
+  string prompt = 2;
+}
+
+message SourcingSessionFiltersBuilderResponse {
+  int32 sourcing_session_id = 1;
+  string sourcing_session_name = 2;
+  int32 min_experience = 3;
+  int32 max_experience = 4;
+  repeated string required_contact_info = 5;
+  string timezone = 6;
+  repeated string locations = 7;
+  repeated string job_titles = 8;
+  string job_seniority = 9;
+  repeated string job_functions = 10;
+  repeated string companies = 11;
+  string company_headcount = 12;
+  string company_funding = 13;
+  repeated string industries = 14;
+  repeated string keywords = 15;
+  repeated string skills = 16;
+  repeated string education_levels = 17;
+  repeated string languages = 18;
+  int32 filter_limit = 19;
+  string session_created_at = 20; 
+  string session_updated_at = 21; 
+  string session_deleted_at = 22; 
+  int32 sourcing_project_id = 23;
+  string sourcing_project_name = 24;
+  string sourcing_project_breif = 25;
+  int32 tenant_id = 26;
+  string project_created_at = 27; 
+  string project_updated_at = 28; 
+  string project_deleted_at = 29; 
+  int32 created_by = 30;
+  string creator_name = 31;
+  string creator_email = 32;
+  repeated string projects = 33;        // List of inferred project names
+  int32 years_of_exp_min = 34;          // Minimum years of experience
+  int32 years_of_exp_max = 35;          // Maximum years of experience
+}
+
+
+message SourcingSessionFiltersInferedRequest {
+  string prompt = 1;
+}
+
+message SourcingSessionFiltersInferedResponse {
+  bool locations = 1;     // true if Locations can be inferred
+  bool skills = 2;        // true if Skills can be inferred
+  bool companies = 3;     // true if Companies can be inferred
+  bool projects = 4;      // true if Projects can be inferred
+  bool years_of_exp = 5;  // true if YearsOfExp can be inferred
+}
+

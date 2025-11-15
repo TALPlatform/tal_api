@@ -5,6 +5,7 @@ package tal.v1;
 import "buf/validate/validate.proto";
 import "tal/v1/accounts_navigation_bar.proto";
 import "tal/v1/accounts_user.proto";
+import "tal/v1/sourcing_sourcing_session.proto";
 import "tal/v1/client.proto";
 
 message AuthLoginRequest {
@@ -32,6 +33,7 @@ message AuthLoginResponse {
   AccountsSchemaUserView user = 1;
   LoginInfo login_info = 2;
   repeated NavigationBarItem navigation_bar = 3;
+  repeated SessionListRow sessions = 4;
 }
 
 message AuthRegisterRequest {

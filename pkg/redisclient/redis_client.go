@@ -62,7 +62,6 @@ func NewRedisClient(host string, port string, password string, db int, isDisable
 		Addr:     fmt.Sprintf("%s:%s", host, port),
 		Password: password, // no password set
 		DB:       db,       // use default DB
-
 	})
 
 	return &RedisClient{

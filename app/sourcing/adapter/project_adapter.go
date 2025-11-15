@@ -16,5 +16,4 @@ func (a *SourcingAdapter) ProjectInputListGrpcFromSql(resp *[]db.ProjectInputLis
 	return &talv1.ProjectInputListResponse{
 		Options: records,
 	}
-
 }

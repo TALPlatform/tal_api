@@ -32,3 +32,14 @@ func (repo *PeopleRepo) RawProfileFind(ctx context.Context, req int32) (*db.RawP
 	}
 	return &resp, nil
 }
+
+func (repo *PeopleRepo) SourcingSessionProfileSync(
+	ctx context.Context,
+	req *db.SourcingSessionProfileSyncParams,
+) error {
+	err := repo.store.SourcingSessionProfileSync(ctx, *req)
+	if err != nil {
+		return repo.store.DbErrorParser(err, repo.errorHandler)
+	}
+	return nil
+}

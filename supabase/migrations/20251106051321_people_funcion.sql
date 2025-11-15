@@ -1,4 +1,4 @@
-DROP function IF EXISTS people_schema.people_list;
+DROP function IF EXISTS people_schema.people_ist;
 create function people_schema.people_list(
     p_prompt text default null,
     p_location text default null,
@@ -272,7 +272,8 @@ INSERT INTO sourcing_schema.sourcing_session_profile (
         is_short_listed,
         summary_bullets,
         justification
-    ) SELECT in_session_id , p.person_id , 0,1,'','',FALSE,array[]::TEXT[],'' FROM tmp_raw_profiles p;
+    ) SELECT in_session_id , p.person_id , 0,1,'','',FALSE,array[]::TEXT[],'' FROM tmp_raw_profiles p 
+ON CONFLICT ON CONSTRAINT sourcing_session_profile_pkey DO NOTHING;
 
     -- 3️⃣ Drop temp table
     DROP TABLE IF EXISTS tmp_raw_profiles;
@@ -296,7 +297,7 @@ RETURNS TABLE (
     person_id BIGINT,
     name TEXT,
     headline TEXT,
-    location TEXT,
+    region TEXT,
     current_title TEXT,
     current_company TEXT,
     industry TEXT,
@@ -328,7 +329,7 @@ BEGIN
             rp.person_id,
             rp.name,
             rp.headline,
-            rp.location,
+            rp.region,
             rp.current_title,
             rp.current_company,
             rp.industry,
@@ -358,7 +359,7 @@ BEGIN
             ))
 
             -- 🌍 LOCATION FILTER (nullable)
-            AND (in_locations IS NULL OR cardinality(in_locations) = 0 OR rp.location ILIKE ANY (
+            AND (in_locations IS NULL OR cardinality(in_locations) = 0 OR rp.region ILIKE ANY (
                 ARRAY(SELECT '%' || l || '%' FROM unnest(in_locations) AS l)
             ))
 
@@ -398,15 +399,15 @@ BEGIN
             ))
 
             -- 🔍 FUZZY / FULL-TEXT FILTER
-            AND (
-                ts_query IS NULL OR rp.search_terms @@ ts_query
-            )
+            -- AND (
+            --     ts_query IS NULL OR rp.search_terms @@ ts_query
+            -- )
     )
     SELECT
         f.person_id,
         coalesce(f.name, '') AS name,
         coalesce(f.headline, '') AS headline,
-        coalesce(f.location, '') AS location,
+        coalesce(f.region, '') AS region,
         coalesce(f.current_title, '') AS current_title,
         coalesce(f.current_company, '') AS current_company,
         coalesce(f.industry, '') AS industry,
@@ -427,9 +428,202 @@ $$;
 
 
 
+DROP FUNCTION IF EXISTS people_schema.raw_profile_list;
 
-
-
-
-
-
+CREATE OR REPLACE FUNCTION people_schema.raw_profile_list(
+    in_min_experience INT DEFAULT NULL,
+    in_max_experience INT DEFAULT NULL,
+    in_required_contact_info TEXT[] DEFAULT NULL,
+    in_timezone TEXT DEFAULT 'any',
+    in_locations TEXT[] DEFAULT NULL,
+    in_job_titles TEXT[] DEFAULT NULL,
+    in_job_seniority TEXT DEFAULT NULL,
+    in_job_functions TEXT[] DEFAULT NULL,
+    in_companies TEXT[] DEFAULT NULL,
+    in_company_headcount TEXT DEFAULT NULL,
+    in_company_funding TEXT DEFAULT NULL,
+    in_industries TEXT[] DEFAULT NULL,
+    in_keywords TEXT[] DEFAULT NULL,
+    in_skills TEXT[] DEFAULT NULL,
+    in_education_levels TEXT[] DEFAULT NULL,
+    in_languages TEXT[] DEFAULT NULL,
+    in_limit INT DEFAULT 50
+)
+RETURNS TABLE (
+    person_id BIGINT,
+    first_name TEXT,
+    last_name TEXT,
+    name TEXT,
+    headline TEXT,
+    location TEXT,
+    current_title TEXT,
+    current_company TEXT,
+    industry TEXT,
+    summary TEXT,
+    linkedin_profile_url TEXT,
+    profile_picture_url TEXT,
+    years_of_experience INT,
+    num_of_connections INT,
+    skills TEXT[],
+    languages TEXT[]
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        rp.person_id,
+        rp.first_name,
+        rp.last_name,
+        rp.name,
+        rp.headline,
+        rp.location,
+        rp.current_title,
+        rp.current_company,
+        rp.industry,
+        rp.summary,
+        rp.linkedin_profile_url,
+        rp.profile_picture_url,
+        rp.years_of_experience_raw,
+        rp.num_of_connections,
+        rp.skills,
+        rp.languages
+    FROM people_schema.raw_profile rp
+    WHERE 
+        -- Experience range filter
+        (in_min_experience IS NULL OR rp.years_of_experience_raw >= in_min_experience)
+        AND (in_max_experience IS NULL OR rp.years_of_experience_raw <= in_max_experience)
+        
+        -- Required contact info (check for non-null fields)
+        AND (
+            in_required_contact_info IS NULL 
+            OR (
+                ('email' = ANY(in_required_contact_info) AND rp.flagship_profile_url IS NOT NULL)
+                OR ('linkedin' = ANY(in_required_contact_info) AND rp.linkedin_profile_url IS NOT NULL)
+                OR ('twitter' = ANY(in_required_contact_info) AND rp.twitter_handle IS NOT NULL)
+            )
+        )
+        
+        -- Location filter (case-insensitive partial match)
+        AND (
+            in_locations IS NULL 
+            OR EXISTS (
+                SELECT 1 
+                FROM unnest(in_locations) AS loc
+                WHERE rp.location ILIKE '%' || loc || '%' 
+                   OR rp.region ILIKE '%' || loc || '%'
+            )
+        )
+        
+        -- Job titles filter (case-insensitive partial match on current_title and headline)
+        AND (
+            in_job_titles IS NULL 
+            OR EXISTS (
+                SELECT 1 
+                FROM unnest(in_job_titles) AS title
+                WHERE rp.current_title ILIKE '%' || title || '%'
+                   OR rp.headline ILIKE '%' || title || '%'
+            )
+        )
+        
+        -- Job seniority (parsed from title/headline)
+        AND (
+            in_job_seniority IS NULL
+            OR (
+                in_job_seniority = 'entry' AND (
+                    rp.current_title ~* '\y(junior|entry|associate|assistant|intern|trainee)\y'
+                    OR rp.headline ~* '\y(junior|entry|associate|assistant|intern|trainee)\y'
+                )
+            )
+            OR (
+                in_job_seniority = 'mid' AND (
+                    rp.current_title ~* '\y(specialist|coordinator|analyst|engineer|developer)\y'
+                    AND NOT rp.current_title ~* '\y(senior|lead|principal|chief|head|director|vp|vice president)\y'
+                )
+            )
+            OR (
+                in_job_seniority = 'senior' AND (
+                    rp.current_title ~* '\y(senior|lead|principal)\y'
+                    OR rp.headline ~* '\y(senior|lead|principal)\y'
+                )
+            )
+            OR (
+                in_job_seniority = 'executive' AND (
+                    rp.current_title ~* '\y(chief|ceo|cto|cfo|coo|vp|vice president|director|head of)\y'
+                    OR rp.headline ~* '\y(chief|ceo|cto|cfo|coo|vp|vice president|director|head of)\y'
+                )
+            )
+        )
+        
+        -- Companies filter (current and past)
+        AND (
+            in_companies IS NULL 
+            OR EXISTS (
+                SELECT 1 
+                FROM unnest(in_companies) AS comp
+                WHERE rp.current_company ILIKE '%' || comp || '%'
+                   OR EXISTS (
+                       SELECT 1 
+                       FROM unnest(rp.all_employers) AS emp
+                       WHERE emp->>'name' ILIKE '%' || comp || '%'
+                   )
+            )
+        )
+        
+        -- Industries filter
+        AND (
+            in_industries IS NULL 
+            OR EXISTS (
+                SELECT 1 
+                FROM unnest(in_industries) AS ind
+                WHERE rp.industry ILIKE '%' || ind || '%'
+            )
+        )
+        
+        -- Keywords search (full-text search on multiple fields)
+        AND (
+            in_keywords IS NULL 
+            OR EXISTS (
+                SELECT 1 
+                FROM unnest(in_keywords) AS kw
+                WHERE rp.search_terms @@ plainto_tsquery('english', kw)
+                   OR rp.headline ILIKE '%' || kw || '%'
+                   OR rp.summary ILIKE '%' || kw || '%'
+                   OR rp.current_title ILIKE '%' || kw || '%'
+            )
+        )
+        
+        -- Skills filter (array overlap)
+        AND (
+            in_skills IS NULL 
+            OR rp.skills && in_skills
+        )
+        
+        -- Education levels (check education JSONB array)
+        AND (
+            in_education_levels IS NULL 
+            OR EXISTS (
+                SELECT 1 
+                FROM unnest(rp.education_background) AS edu,
+                     unnest(in_education_levels) AS level
+                WHERE edu->>'degree' ILIKE '%' || level || '%'
+            )
+        )
+        
+        -- Languages filter
+        AND (
+            in_languages IS NULL 
+            OR rp.languages && in_languages
+        )
+    
+    ORDER BY 
+        -- Prioritize profiles with more complete information
+        (CASE WHEN rp.linkedin_profile_url IS NOT NULL THEN 1 ELSE 0 END +
+         CASE WHEN rp.summary IS NOT NULL THEN 1 ELSE 0 END +
+         CASE WHEN rp.years_of_experience_raw IS NOT NULL THEN 1 ELSE 0 END) DESC,
+        rp.num_of_connections DESC NULLS LAST,
+        rp.updated_at DESC
+    
+    LIMIT in_limit;
+END;
+$$;

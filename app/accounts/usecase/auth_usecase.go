@@ -191,7 +191,7 @@ func (u *AccountsUsecase) AuthRegister(ctx context.Context, req *connect.Request
 	if err != nil {
 		return nil, err
 	}
-	err = u.WithNavigationBar(ctx, response)
+	err = u.WithNavigationBar(ctx, response, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +214,7 @@ func (u *AccountsUsecase) AuthRegister(ctx context.Context, req *connect.Request
 	}, nil
 }
 
-func (u *AccountsUsecase) WithNavigationBar(ctx context.Context, response *talv1.AuthLoginResponse) error {
+func (u *AccountsUsecase) WithNavigationBar(ctx context.Context, response *talv1.AuthLoginResponse, sourcingSessions *[]db.SourcingSessionListRow) error {
 	navigtionBarRequest := db.UserNavigationBarFindParams{
 		UserID:          response.User.UserId,
 		NavigationBarID: response.User.UserTypeId,
@@ -224,7 +224,7 @@ func (u *AccountsUsecase) WithNavigationBar(ctx context.Context, response *talv1
 		return err
 	}
 	if len(*navigationBar) > 0 {
-		navigations, err := u.adapter.UserNavigationBarFindGrpcFromSql(*navigationBar)
+		navigations, err := u.adapter.UserNavigationBarFindGrpcFromSql(*navigationBar, nil)
 		if err != nil {
 			return err
 		}
@@ -271,7 +271,11 @@ func (u *AccountsUsecase) AuthLogin(ctx context.Context, req *connect.Request[ta
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("invalid  app login %w", err))
 	}
-	err = u.WithNavigationBar(ctx, response)
+	sourcingSessions, err := u.repo.SourcingSessionList(ctx, response.User.TenantId)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("invalid  app login %w", err))
+	}
+	err = u.WithNavigationBar(ctx, response, sourcingSessions)
 	if err != nil {
 		return nil, err
 	}
@@ -342,7 +346,7 @@ func (u *AccountsUsecase) AuthLoginProviderCallback(ctx context.Context, req *co
 	if err != nil {
 		return nil, err
 	}
-	err = u.WithNavigationBar(ctx, response)
+	err = u.WithNavigationBar(ctx, response, nil)
 	if err != nil {
 		return nil, err
 	}

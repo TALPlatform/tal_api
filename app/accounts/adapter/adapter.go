@@ -15,7 +15,7 @@ type AccountsAdapterInterface interface {
 	AuthSessionListGrpcFromRedis(resp []*redisclient.AuthSession) *talv1.AuthSessionListResponse
 	AuthResetPasswordSupaFromGrpc(req *talv1.AuthResetPasswordRequest) *types.VerifyForUserRequest
 	AuthLoginGrpcFromSql(resp *db.AccountsSchemaUserView) *talv1.AuthLoginResponse
-	UserNavigationBarFindGrpcFromSql(dbResponse []db.UserNavigationBarFindRow) ([]*talv1.NavigationBarItem, error)
+	UserNavigationBarFindGrpcFromSql(dbResponse []db.UserNavigationBarFindRow, sourcingSessions *[]db.SourcingSessionListRow) ([]*talv1.NavigationBarItem, error)
 	UserCreateUpdateGrpcFromSql(resp *db.AccountsSchemaUser) *talv1.UserCreateUpdateResponse
 	UserFindRowGrpcFromSql(resp *db.UserFindRow) *talv1.UserFindRow
 	UserSessionsGrpcFropmSql(sessions []*redisclient.AuthSession) []*talv1.UserSession

@@ -1,5 +1,6 @@
 # Build stage
 FROM  golang:alpine3.20 AS builder
+ENV GOTOOLCHAIN=auto
 WORKDIR /app
 COPY . .
 RUN go build -o main main.go

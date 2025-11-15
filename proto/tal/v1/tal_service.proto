@@ -39,39 +39,79 @@ import "tal/v1/tenant_tenant.proto";
 
 service TalService {
   // INJECT METHODS
-rpc RawProfileListRequestBuild(RawProfileListRequestBuildRequest) returns (RawProfileListRequestBuildResponse) {  
-
-    option (permission_group) = 'sourcing';
+rpc SourcingSessionFiltersInfered(SourcingSessionFiltersInferedRequest) returns (SourcingSessionFiltersInferedResponse) { 
+    option (permission_group) = 'sourcing_session';
     option (permission_name) = 'SourcingSessionCreate';
-option idempotency_level = NO_SIDE_EFFECTS;  
 }
 
 
-rpc RawProfileFind(RawProfileFindRequest) returns (RawProfileFindResponse) {  }
+rpc SourcingSessionFiltersBuilder(SourcingSessionFiltersBuilderRequest) returns (SourcingSessionFiltersBuilderResponse) { 
+    // option (skip_authorization) = true;
+    option (permission_group) = 'sourcing_session';
+    option (permission_name) = 'SourcingSessionCreate';
+}
 
 
-rpc SourcingSessionProfileCreateUpdate(SourcingSessionProfileCreateUpdateRequest) returns (SourcingSessionProfileCreateUpdateResponse) { 
-    option (permission_group) = 'sourcing';
+rpc SourcingSessionApply(SourcingSessionApplyRequest) returns (stream SourcingSessionApplyResponse) {  
+    option (permission_group) = 'sourcing_session';
+    option (permission_name) = 'SourcingSessionCreate';
+}
+
+
+rpc SourcingSessionCriteriaCreate(SourcingSessionCriteriaCreateRequest) returns (stream SourcingSessionCriteriaCreateResponse) {
+    option (permission_group) = 'sourcing_session';
+    option (permission_name) = 'SourcingSessionCreate';
+}
+
+
+rpc SourcingSessionProfileJustify(SourcingSessionProfileJustifyRequest) returns (stream  SourcingSessionProfileJustifyResponse) {  
+    option (permission_group) = 'sourcing_session';
+    option (permission_name) = 'SourcingSessionCreate';
+option idempotency_level = NO_SIDE_EFFECTS;  }
+
+
+rpc SourcingSessionList(SourcingSessionListRequest) returns (SourcingSessionListResponse) {
+    option (permission_group) = 'sourcing_session';
+    option (permission_name) = 'SourcingSessionList';
+    option idempotency_level = NO_SIDE_EFFECTS;  
+}
+
+
+rpc RawProfileListRequestBuild(RawProfileListRequestBuildRequest) returns (RawProfileListRequestBuildResponse) {  
+    option (permission_group) = 'sourcing_session';
     option (permission_name) = 'SourcingSessionUpdate';
 }
 
 
-rpc SourcingSessionFind(SourcingSessionFindRequest) returns (SourcingSessionFindResponse) {  }
+rpc RawProfileFind(RawProfileFindRequest) returns (RawProfileFindResponse) {  
+    option (skip_authorization) = true;
+}
+
+
+rpc SourcingSessionProfileCreateUpdate(SourcingSessionProfileCreateUpdateRequest) returns (SourcingSessionProfileCreateUpdateResponse) { 
+    option (permission_group) = 'sourcing_session';
+    option (permission_name) = 'SourcingSessionUpdate';
+}
+
+
+rpc SourcingSessionFind(SourcingSessionFindRequest) returns (SourcingSessionFindResponse) { 
+    option (permission_group) = 'sourcing_session';
+}
 
 
 rpc SourcingSessionCreateUpdate(SourcingSessionCreateUpdateRequest) returns (SourcingSessionCreateUpdateResponse) { 
-    option (permission_name) = 'SourcingSessionCreate';
+    option (permission_group) = 'sourcing_session';
 }
 
 
 rpc ProjectInputList(ProjectInputListRequest) returns (ProjectInputListResponse) {
-option idempotency_level = NO_SIDE_EFFECTS;  
-    option (permission_group) = 'sourcing';
+    option (permission_group) = 'sourcing_project';
     option (permission_name) = 'SourcingProjectList';
+    option idempotency_level = NO_SIDE_EFFECTS;  
 }
 
 
-rpc RawProfileList(RawProfileListRequest) returns (RawProfileListResponse) {  option idempotency_level = NO_SIDE_EFFECTS;  }
+rpc RawProfileList(RawProfileListRequest) returns (stream RawProfileListResponse) {  option idempotency_level = NO_SIDE_EFFECTS;  }
 
   rpc SectionListInpt(SectionListInptRequest) returns (SectionListInptResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;

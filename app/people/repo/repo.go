@@ -11,7 +11,10 @@ type PeopleRepoInterface interface {
 	// INJECT INTERFACE
 
 	RawProfileFind(ctx context.Context, req int32) (*db.RawProfileFindRow, error)
-
+	SourcingSessionProfileSync(
+		ctx context.Context,
+		req *db.SourcingSessionProfileSyncParams,
+	) error
 	RawProfileList(ctx context.Context, req *db.RawProfileListParams) (*[]*db.RawProfileListRow, error)
 	RawProfileBulkCreateUpdate(ctx context.Context, params *db.RawProfilesBulkCreateUpdateParams) error
 }

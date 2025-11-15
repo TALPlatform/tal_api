@@ -1,0 +1,25 @@
+{{/* 
+Template: sourcing_profile_justify.tmpl
+Purpose: Generate a concise paragraph justifying why a profile matches a session/project
+Variables:
+  - SourcingSessionName
+  - InitialFilters
+  - SourcingProjectName
+  - SourcingProjectBrief
+  - Profile (map or struct with all profile fields)
+*/}}
+
+You are an AI assistant. Provide a short, professional justification (1-3 sentences) explaining why this profile matches the session "{{ .SourcingSessionName }}" in project "{{ .SourcingProjectName }}".
+
+Session Initial Filters:
+{{ .InitialFilters }}
+
+Project Brief:
+{{ .SourcingProjectBrief }}
+
+Profile Data:
+{{ range $key, $value := .Profile }}
+- {{ $key }}: {{ $value }}
+{{ end }}
+
+Write the justification in a clear and friendly professional tone.

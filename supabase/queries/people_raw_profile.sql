@@ -1,31 +1,31 @@
 
 -- name: RawProfileList :many
-SELECT
-  person_id::BIGINT,
-  name::TEXT,
-  headline::TEXT,
-  location::TEXT,
-  current_title::TEXT,
-  current_company::TEXT,
-  industry::TEXT,
-  summary::TEXT,
-  years_of_experience::TEXT,
-  num_of_connections::INT,
-  profile_picture_url::TEXT,
-  linkedin_profile_url::TEXT,
-  skills::TEXT[],
-  semantic_score::FLOAT,
-  text_rank::FLOAT,
-  hybrid_score::FLOAT hybrid_score
-FROM people_schema.raw_profile_search(
-    in_query := sqlc.arg('query')::TEXT,
-    in_embedding := sqlc.arg('embedding')::VECTOR(1536),
-    in_industries := sqlc.arg('industries')::TEXT[],
-    in_locations := sqlc.arg('locations')::TEXT[],
-    in_skills := sqlc.arg('skills')::TEXT[],
-    in_companies := sqlc.arg('companies')::TEXT[],
-    in_projects := sqlc.arg('projects')::TEXT[],
-    in_limit := sqlc.arg('limit')::INT
+select
+  person_id::bigint,
+  name::text,
+  headline::text,
+  region::text,
+  current_title::text,
+  current_company::text,
+  industry::text,
+  summary::text,
+  years_of_experience::text,
+  num_of_connections::int,
+  profile_picture_url::text,
+  linkedin_profile_url::text,
+  skills::text[],
+  semantic_score::float,
+  text_rank::float,
+  hybrid_score::float hybrid_score
+from people_schema.raw_profile_search(
+    in_query := sqlc.arg('query')::text,
+    in_embedding := sqlc.arg('embedding')::vector(1536),
+    in_industries := sqlc.arg('industries')::text[],
+    in_locations := sqlc.arg('locations')::text[],
+    in_skills := sqlc.arg('skills')::text[],
+    in_companies := sqlc.arg('companies')::text[],
+    in_projects := sqlc.arg('projects')::text[],
+    in_limit := sqlc.arg('limit')::int
 );
 
 -- name: RawProfilesBulkCreateUpdate :exec
@@ -37,8 +37,7 @@ SELECT people_schema.raw_profiles_bulk_create_update(
 -- name: RawProfileFind :one
 SELECT
     person_id,
-    embedding_source_text,
-    full_profile_embedding,
+    coalesce(embedding_source_text , '') embedding_source_text,
     embedding_model,
     embedding_updated_at,
     first_name,

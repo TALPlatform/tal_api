@@ -15,9 +15,13 @@ import (
 	tenantUsecase "github.com/TALPlatform/tal_api/app/tenant/usecase"
 	"github.com/TALPlatform/tal_api/config"
 	"github.com/TALPlatform/tal_api/db"
+	"github.com/TALPlatform/tal_api/pkg/agenthub"
+	"github.com/TALPlatform/tal_api/pkg/asynqclient"
+	"github.com/TALPlatform/tal_api/pkg/asynqworker"
 	"github.com/TALPlatform/tal_api/pkg/auth"
 	"github.com/TALPlatform/tal_api/pkg/crustdata"
-	"github.com/TALPlatform/tal_api/pkg/llm"
+
+	// "github.com/TALPlatform/tal_api/pkg/llm"
 	"github.com/TALPlatform/tal_api/pkg/redisclient"
 	"github.com/bufbuild/protovalidate-go"
 
@@ -36,6 +40,7 @@ type Api struct {
 	validator       *protovalidate.Validator
 	tokenMaker      auth.Maker
 	sqlSeeder       sqlseeder.SeederInterface
+	asynqClient     asynqclient.Enqueuer // 👈 new dependency
 	publicUsecase   publicUsecase.PublicUsecaseInterface
 
 	weaviateClient weaviateclient.WeaviateClientInterface // 👈 NEW FIELD
@@ -54,7 +59,16 @@ func HashFunc(req string) string {
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req), bcrypt.DefaultCost)
 	return string(hashedPassword)
 }
-func NewApi(config config.Config, store db.Store, tokenMaker auth.Maker, redisClient redisclient.RedisClientInterface, genAiRedisClient *redis.Client, validator *protovalidate.Validator) (talv1connect.TalServiceHandler, error) {
+func NewApi(
+	config config.Config,
+	store db.Store,
+	tokenMaker auth.Maker,
+	redisClient redisclient.RedisClientInterface,
+	genAiRedisClient *redis.Client,
+	validator *protovalidate.Validator,
+	asynqClient asynqclient.Enqueuer,
+	asynqWorker *asynqworker.Worker,
+) (talv1connect.TalServiceHandler, error) {
 	resendClient, err := resend.NewResendService(config.ResendApiKey, config.ClientBaseUrl)
 	if err != nil {
 		return nil, err
@@ -79,10 +93,11 @@ func NewApi(config config.Config, store db.Store, tokenMaker auth.Maker, redisCl
 		ServiceRoleKey: config.SupabaseServiceRoleKey,
 		ApiKey:         config.SupabaseApiKey,
 	})
-	llmClient, err := llm.NewLLM(config, genAiRedisClient)
-	if err != nil {
-		return nil, fmt.Errorf("error creating llm api client : %w", err)
-	}
+	agenthub := agenthub.NewAgentHub(genAiRedisClient)
+	agenthub.RegisterStructuredAgents(config.GeminiAPIKey, config.DefaultModel, true)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("error creating llm api client : %w", err)
+	// }
 
 	crustDataClient, err := crustdata.NewCrustdataService(config.CrustdataAPIKey, config.CrustdataAPIURL)
 	if err != nil {
@@ -91,23 +106,30 @@ func NewApi(config config.Config, store db.Store, tokenMaker auth.Maker, redisCl
 
 	sqlSeeder := sqlseeder.NewSeeder(sqlseeder.SeederConfig{HashFunc: HashFunc})
 	// USECASE_INSTANTIATIONS
-	sourcingUsecase := sourcingUsecase.NewSourcingUsecase(store, llmClient)
-
-	peopleUsecase, err := peopleUsecase.NewPeopleUsecase(store, crustDataClient, llmClient)
+	peopleUsecaseInstance, err := peopleUsecase.NewPeopleUsecase(store, crustDataClient, asynqClient)
 	if err != nil {
 		return nil, fmt.Errorf("error creating people usecase : %w", err)
 	}
-
+	structuredAgents := agenthub.GetStructuredAgents()
+	sourcingUsecase := sourcingUsecase.NewSourcingUsecase(
+		store,
+		crustDataClient,
+		asynqClient,
+		peopleUsecaseInstance.RawProfileFind,
+		genAiRedisClient,
+		structuredAgents.SourcingSessionFiltersGuess,
+		structuredAgents.SourcingSessionFiltersBuild,
+		structuredAgents.SessionProfileJustifer,
+	)
+	asynqWorker.RegisterHandlers(peopleUsecaseInstance.RawProfileSync, sourcingUsecase.SyncSourcingSessionProfiles)
 	tenantUsecase := tenantUsecase.NewTenantUsecase(store, redisClient)
 	accountsUsecase := accountsUsecase.NewAccountsUsecase(store, supaapi, redisClient, tokenMaker, config.AccessTokenDuration, config.RefreshTokenDuration)
 	publicUsecase := publicUsecase.NewPublicUsecase(store, config.SupabaseApiKey, supaapi, redisClient, resendClient, weaviateClient)
 	return &Api{
 		// USECASE_INJECTIONS
 		sourcingUsecase: sourcingUsecase,
-
-		peopleUsecase: peopleUsecase,
-
-		weaviateClient: weaviateClient,
+		peopleUsecase:   peopleUsecaseInstance,
+		weaviateClient:  weaviateClient,
 		// typesenseClient: typesenseClient,
 		accountsUsecase: accountsUsecase,
 		tenantUsecase:   tenantUsecase,

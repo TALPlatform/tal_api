@@ -10,6 +10,8 @@ import (
 	"connectrpc.com/grpcreflect"
 	"github.com/TALPlatform/tal_api/config"
 	"github.com/TALPlatform/tal_api/db"
+	"github.com/TALPlatform/tal_api/pkg/asynqclient"
+	"github.com/TALPlatform/tal_api/pkg/asynqworker"
 	"github.com/TALPlatform/tal_api/pkg/auth"
 	"github.com/TALPlatform/tal_api/pkg/redisclient"
 	"github.com/TALPlatform/tal_api/proto_gen/tal/v1/talv1connect"
@@ -30,8 +32,17 @@ type Server struct {
 	api         talv1connect.TalServiceHandler
 }
 
-func NewServer(config config.Config, store db.Store, tokenMaker auth.Maker, redisClient redisclient.RedisClientInterface, genAiRedisClient *redis.Client, validator *protovalidate.Validator) (*Server, error) {
-	api, err := NewApi(config, store, tokenMaker, redisClient, genAiRedisClient, validator)
+func NewServer(config config.Config,
+	store db.Store,
+	tokenMaker auth.Maker,
+	redisClient redisclient.RedisClientInterface,
+	genAiRedisClient *redis.Client,
+	validator *protovalidate.Validator,
+	asynqClient asynqclient.Enqueuer,
+	asynqWorker *asynqworker.Worker,
+
+) (*Server, error) {
+	api, err := NewApi(config, store, tokenMaker, redisClient, genAiRedisClient, validator, asynqClient, asynqWorker)
 
 	if err != nil {
 		return nil, err
@@ -114,8 +125,9 @@ func (s Server) NewGrpcHttpServer() *http.Server {
 		MaxAge:           int(2 * time.Hour / time.Second),
 	})
 	server := &http.Server{
-		Addr:    s.config.GRPCServerAddress,
-		Handler: h2c.NewHandler(s.InjectRefreshTokenMiddleware(cors.Handler(mux)), &http2.Server{}),
+		Addr:         s.config.GRPCServerAddress,
+		Handler:      h2c.NewHandler(s.InjectRefreshTokenMiddleware(cors.Handler(mux)), &http2.Server{}),
+		WriteTimeout: 10 * time.Minute, // for long streams
 	}
 	return server
 

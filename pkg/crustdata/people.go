@@ -132,18 +132,19 @@ type Certification struct {
 }
 
 // SearchPeople implements the people discovery API
-func (c *CrustdataService) PeopleSearch(ctx context.Context, req *PeopleSearchRequest) (*PeopleSearchResponse, error) {
+func (c *CrustdataService) PeopleSearch(ctx context.Context, req *PeopleSearchRequest) (*[]byte, error) {
 	path := "/screener/persondb/search"
-
 	body, err := c.Client.doRequest(ctx, "POST", path, req)
 	if err != nil {
 		return nil, err
 	}
+	return &body, nil
+}
 
+func (c *CrustdataService) PeopleSearchParse(data *[]byte) (*PeopleSearchResponse, error) {
 	var response PeopleSearchResponse
-	if err := json.Unmarshal(body, &response); err != nil {
+	if err := json.Unmarshal(*data, &response); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
 	}
-
 	return &response, nil
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/TALPlatform/tal_api/pkg/redisclient"
 	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
 	"github.com/iancoleman/strcase"
+	"github.com/rs/zerolog/log"
 	"github.com/supabase-community/auth-go/types"
 )
 
@@ -19,7 +20,51 @@ type NavigationsMap map[int32]*talv1.NavigationBarItem
 // This hierarchy supports any number of levels, as long as the input list is sorted in ascending order by level.
 // The function uses navigationBarItemId as a primary key and parentId as a foreign key to link items with their parents.
 // The function logic breakdown is listed as comments inside the function body.
-func (a *AccountsAdapter) UserNavigationBarFindGrpcFromSql(dbResponse []db.UserNavigationBarFindRow) ([]*talv1.NavigationBarItem, error) {
+func createKeyFromSessionName(name string) string {
+	// This is a minimal example; a real slugify function would handle spaces,
+	// special characters, and non-ASCII text robustly.
+	return strings.ReplaceAll(strings.ToLower(name), " ", "_")
+}
+func (a *AccountsAdapter) UserNavigationBarFindGrpcFromSourcingSession(dbResponse *[]db.SourcingSessionListRow) []*talv1.NavigationBarItem {
+	if dbResponse == nil || len(*dbResponse) == 0 {
+		return nil
+	}
+
+	// Initialize the slice to hold the converted gRPC items
+	grpcItems := make([]*talv1.NavigationBarItem, 0, len(*dbResponse))
+
+	// Loop through each sourcing session from the database
+	for _, session := range *dbResponse {
+		// Convert the session name into a URL-friendly key/slug
+		sessionKey := createKeyFromSessionName(session.SourcingSessionName)
+
+		// Create the NavigationBarItem for the current session
+		item := &talv1.NavigationBarItem{
+			// Use the SourcingSessionID for the item ID (assuming unique)
+			NavigationBarItemId: session.SourcingSessionID,
+			// We don't have a ParentId here, this will be set by the caller
+			// once all dynamic items are collected and attached to a static parent (e.g., "Sourcing")
+			ParentId: 0,
+			// Key for programmatic access
+			Key: "sourcing_session_" + sessionKey,
+			// Label displayed to the user
+			Label: fmt.Sprintf("%s", session.SourcingSessionName),
+			// Placeholder for Arabic label (A more complex function might look up translations)
+			LabelAr: fmt.Sprintf("%s", session.SourcingSessionName),
+			// A relevant icon for a sourcing session
+			Icon: "target-account-outline",
+			// The route should be specific to this session's ID
+			Route: fmt.Sprintf("/sourcing/session/%d", session.SourcingSessionID),
+			// Level 2 is a reasonable default for dynamic sub-items
+			Level: 2,
+			Items: nil, // Dynamic sessions typically don't have sub-items
+		}
+		grpcItems = append(grpcItems, item)
+	}
+
+	return grpcItems
+}
+func (a *AccountsAdapter) UserNavigationBarFindGrpcFromSql(dbResponse []db.UserNavigationBarFindRow, sourcingSessions *[]db.SourcingSessionListRow) ([]*talv1.NavigationBarItem, error) {
 	// 1. Get the maximum level in the tree by accessing the last element in the array, since the response is sorted by level.
 	maxLevel := dbResponse[len(dbResponse)-1].Level
 
@@ -44,6 +89,12 @@ func (a *AccountsAdapter) UserNavigationBarFindGrpcFromSql(dbResponse []db.UserN
 		primaryKeyValue := dbItem.NavigationBarItemID
 		grpcItem := a.NavigationBarItemGrpcFromSql(&dbItem)
 
+		log.Debug().Interface("the key is", grpcItem.Key).Msg("hi")
+		if dbItem.MenuKey == "05_sourcing" {
+			sourcingItems := a.UserNavigationBarFindGrpcFromSourcingSession(sourcingSessions)
+			grpcItem.Items = append(grpcItem.Items, sourcingItems...)
+			log.Debug().Interface("the value is", grpcItem.Items).Msg("hi")
+		}
 		// Calculate levelIndex to store items in reverse order in levelItemsMap.
 		// If dbItem.Level equals maxLevel, it will go to the first index in levelItemsMap,
 		// and if dbItem.Level equals 1, it will go to the last index.

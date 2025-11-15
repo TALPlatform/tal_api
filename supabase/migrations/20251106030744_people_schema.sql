@@ -225,3 +225,34 @@ CREATE INDEX idx_raw_profile_embedding_hnsw
   WITH (M = 16, ef_construction = 128); -- HNSW parameters remain optimal
 
 CREATE INDEX idx_raw_profile_skills_gin ON people_schema.raw_profile USING gin (skills);
+
+-- Create indexes to improve search performance
+CREATE INDEX IF NOT EXISTS idx_raw_profile_experience 
+    ON people_schema.raw_profile(years_of_experience_raw);
+
+CREATE INDEX IF NOT EXISTS idx_raw_profile_location 
+    ON people_schema.raw_profile USING gin(to_tsvector('english', COALESCE(location, '') || ' ' || COALESCE(region, '')));
+
+CREATE INDEX IF NOT EXISTS idx_raw_profile_title 
+    ON people_schema.raw_profile USING gin(to_tsvector('english', COALESCE(current_title, '') || ' ' || COALESCE(headline, '')));
+
+CREATE INDEX IF NOT EXISTS idx_raw_profile_company 
+    ON people_schema.raw_profile(current_company);
+
+CREATE INDEX IF NOT EXISTS idx_raw_profile_industry 
+    ON people_schema.raw_profile(industry);
+
+CREATE INDEX IF NOT EXISTS idx_raw_profile_skills 
+    ON people_schema.raw_profile USING gin(skills);
+
+CREATE INDEX IF NOT EXISTS idx_raw_profile_languages 
+    ON people_schema.raw_profile USING gin(languages);
+
+CREATE INDEX IF NOT EXISTS idx_raw_profile_search_terms 
+    ON people_schema.raw_profile USING gin(search_terms);
+
+CREATE INDEX IF NOT EXISTS idx_raw_profile_all_employers 
+    ON people_schema.raw_profile USING gin(all_employers);
+
+CREATE INDEX IF NOT EXISTS idx_raw_profile_education 
+    ON people_schema.raw_profile USING gin(education_background);

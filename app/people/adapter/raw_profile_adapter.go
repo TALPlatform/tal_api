@@ -10,8 +10,6 @@ import (
 	"github.com/TALPlatform/tal_api/db"
 	"github.com/TALPlatform/tal_api/pkg/crustdata"
 	talv1 "github.com/TALPlatform/tal_api/proto_gen/tal/v1"
-	"github.com/darwishdev/genaiclient"
-	"github.com/pgvector/pgvector-go"
 )
 
 // FilterCondition defines the structure of a single filter condition for Crustdata
@@ -45,11 +43,11 @@ func (a *PeopleAdapter) RawProfileListEnrichAndMarshal(
 		embeddingSourceTexts[i] = strings.Join(sourceParts, " ")
 	}
 	enrichedProfiles := make([]map[string]interface{}, len(profiles.Profiles))
-	embeddings, err := a.embedBulk(ctx, embeddingSourceTexts, &genaiclient.EmbedOptions{Dimensions: 1536})
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate embeddings: %w", err)
-	}
-
+	// embeddings, err := a.embedBulk(ctx, embeddingSourceTexts, &genaiclient.EmbedOptions{Dimensions: 1536})
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to generate embeddings: %w", err)
+	// }
+	//
 	for i, p := range profiles.Profiles {
 		profileJSON, _ := json.Marshal(p)
 		var profileMap map[string]interface{}
@@ -57,7 +55,7 @@ func (a *PeopleAdapter) RawProfileListEnrichAndMarshal(
 			return nil, fmt.Errorf("failed to unmarshal profile to map: %w", err)
 		}
 		profileMap["embedding_source_text"] = embeddingSourceTexts[i]
-		profileMap["full_profile_embedding"] = pgvector.NewVector(embeddings[i])
+		// profileMap["full_profile_embedding"] = pgvector.NewVector(embeddings[i])
 		enrichedProfiles[i] = profileMap
 	}
 
@@ -70,47 +68,6 @@ func (a *PeopleAdapter) RawProfileListEnrichAndMarshal(
 		SessionID: session_id,
 		Profiles:  jsonBytes,
 	}, nil
-}
-
-func (a *PeopleAdapter) RawProfileListDbFromCrustData(req *[]*crustdata.PersonDBProfile) *[]*db.RawProfileListRow {
-	var rows []*db.RawProfileListRow
-
-	for _, p := range *req {
-		if p == nil {
-			continue
-		}
-
-		var currentTitle, currentCompany string
-
-		// Extract most relevant current employment
-		if len(p.CurrentEmployers) > 0 {
-			currentTitle = p.CurrentEmployers[0].Title
-			currentCompany = p.CurrentEmployers[0].Name
-		} else if len(p.PastEmployers) > 0 {
-			// fallback to past employment if no current job
-			currentTitle = p.PastEmployers[0].Title
-			currentCompany = p.PastEmployers[0].Name
-		}
-
-		row := &db.RawProfileListRow{
-			PersonID:       p.PersonID,
-			Name:           p.Name,
-			Headline:       p.Headline,
-			Location:       p.Region,
-			CurrentTitle:   currentTitle,
-			CurrentCompany: currentCompany,
-			Industry:       "", // Crustdata doesn’t provide a direct industry field; leave empty or derive later
-			Summary:        p.Summary,
-			Skills:         p.Skills,
-			SemanticScore:  0, // To be calculated if needed
-			TextRank:       0, // To be calculated if needed
-			HybridScore:    0, // To be calculated if needed
-		}
-
-		rows = append(rows, row)
-	}
-
-	return &rows
 }
 
 // RawProfileListCrustDataFromGrpc converts RawProfileListRequest → Crustdata PeopleSearchRequest
@@ -199,6 +156,45 @@ func (a *PeopleAdapter) RawProfileListCrustDataFromGrpc(req *talv1.RawProfileLis
 		})
 	}
 
+	if req.YearsOfExperienceFrom > 0 || req.YearsOfExperienceTo > 0 {
+		expConditions := []interface{}{}
+
+		// Check for minimum experience (YearsOfExperienceFrom)
+		if req.YearsOfExperienceFrom > 0 {
+			expConditions = append(expConditions,
+				FilterCondition{
+					Column: "years_of_experience_raw", // Replace with your actual column name
+					Type:   ">=",
+					Value:  string(req.YearsOfExperienceFrom),
+				},
+			)
+		}
+
+		// Check for maximum experience (YearsOfExperienceTo)
+		// Only apply if it's greater than 0 AND greater than 'From' to avoid conflict,
+		// or if 'From' is 0, just apply the 'To' limit.
+		if req.YearsOfExperienceTo > 0 {
+			// This check ensures 'To' is only used as an upper limit
+			// and isn't a simple 'YearsOfExperienceFrom' value that defaulted 'To' to 0.
+			if req.YearsOfExperienceTo >= req.YearsOfExperienceFrom {
+				expConditions = append(expConditions,
+					FilterCondition{
+						Column: "years_of_experience_raw", // Replace with your actual column name
+						Type:   "<=",
+						Value:  string(req.YearsOfExperienceTo),
+					},
+				)
+			}
+		}
+
+		// Experience filters must ALL apply (AND)
+		if len(expConditions) > 0 {
+			conditions = append(conditions, FilterGroup{
+				Op:         "and",
+				Conditions: expConditions,
+			})
+		}
+	}
 	// 6. Health filters (ensure profiles are complete)
 	healthFilters := []interface{}{
 		// summary must not be empty
@@ -238,10 +234,10 @@ func (a *PeopleAdapter) RawProfileListSqlFromGrpc(req *talv1.RawProfileListReque
 	if req.Limit == 0 {
 		req.Limit = 10
 	}
-	queryEmbedding, _ := a.embed(context.Background(), req.Query, &genaiclient.EmbedOptions{Dimensions: 1536})
+	// queryEmbedding, _ := a.embed(context.Background(), req.Query, &genaiclient.EmbedOptions{Dimensions: 1536})
 	return &db.RawProfileListParams{
-		Query:      req.Query,
-		Embedding:  pgvector.NewVector(queryEmbedding),
+		Query: req.Query,
+		// Embedding:  pgvector.NewVector(queryEmbedding),
 		Industries: req.Industries,
 		Locations:  req.Locations,
 		Skills:     req.Skills,
@@ -250,15 +246,15 @@ func (a *PeopleAdapter) RawProfileListSqlFromGrpc(req *talv1.RawProfileListReque
 		Limit:      req.Limit,
 	}
 }
-func (a *PeopleAdapter) rawProfileRowToGrpc(r *db.RawProfileListRow) *talv1.RawProfileListRow {
+func (a *PeopleAdapter) RawProfileListGrpcFromSql(r *db.RawProfileListRow) *talv1.RawProfileListResponse {
 	if r == nil {
 		return nil
 	}
-	return &talv1.RawProfileListRow{
+	return &talv1.RawProfileListResponse{
 		PersonId:       r.PersonID,
 		Name:           r.Name,
 		Headline:       r.Headline,
-		Location:       r.Location,
+		Location:       r.Region,
 		CurrentTitle:   r.CurrentTitle,
 		CurrentCompany: r.CurrentCompany,
 		Industry:       r.Industry,
@@ -271,27 +267,28 @@ func (a *PeopleAdapter) rawProfileRowToGrpc(r *db.RawProfileListRow) *talv1.RawP
 }
 
 // Converts SQLC rows to gRPC response.
-func (a *PeopleAdapter) RawProfileListGrpcFromSql(rows *[]*db.RawProfileListRow, crustDataReq ...*[]*db.RawProfileListRow) *talv1.RawProfileListResponse {
-	resp := &talv1.RawProfileListResponse{
-		Records: make([]*talv1.RawProfileListRow, len(*rows)),
-	}
-
-	for index, r := range *rows {
-		row := a.rawProfileRowToGrpc(r)
-		resp.Records[index] = row
-	}
-	if crustDataReq != nil {
-		for _, row := range crustDataReq {
-			for _, r := range *row {
-				row := a.rawProfileRowToGrpc(r)
-				resp.Records = append(resp.Records, row)
-			}
-		}
-
-	}
-
-	return resp
-}
+//
+//	func (a *PeopleAdapter) RawProfileListGrpcFromSql(rows *[]*db.RawProfileListRow, crustDataReq ...*[]*db.RawProfileListRow) *talv1.RawProfileListResponse {
+//		resp := &talv1.RawProfileListResponse{
+//			Records: make([]*talv1.RawProfileListRow, len(*rows)),
+//		}
+//
+//		for index, r := range *rows {
+//			row := a.rawProfileRowToGrpc(r)
+//			resp.Records[index] = row
+//		}
+//		if crustDataReq != nil {
+//			for _, row := range crustDataReq {
+//				for _, r := range *row {
+//					row := a.rawProfileRowToGrpc(r)
+//					resp.Records = append(resp.Records, row)
+//				}
+//			}
+//
+//		}
+//
+//		return resp
+//	}
 
 func (a *PeopleAdapter) RawProfileFindGrpcFromSql(req *db.RawProfileFindRow) *talv1.RawProfileFindResponse {
 	if req == nil {
@@ -376,4 +373,57 @@ func (a *PeopleAdapter) RawProfileFindGrpcFromSql(req *db.RawProfileFindRow) *ta
 		Honors:                  honors,
 		Certifications:          certifications,
 	}
+}
+
+// func (a *PeopleAdapter) 	RawProfileGrpcFromCrustdata(row *crustdata.PersonDBProfile) *talv1.RawProfileListResponse{
+//
+//		return &talv1.rawprofilefindresponse{
+//			personid:                req.personid,
+//			name:                    req.name.string,
+//			firstname:               req.firstname.string,
+//			lastname:                req.lastname.string,
+//			region:                  req.region.string,
+//			regionaddresscomponents: regioncomponents,
+//			headline:                req.headline.string,
+//			summary:                 req.summary.string,
+//			skills:                  req.skills,
+//			languages:               req.languages,
+//			profilelanguage:         req.profilelanguage.string,
+//			twitterhandle:           req.twitterhandle.string,
+//			opentocards:             opentocards,
+//			numofconnections:        req.numofconnections.int32,
+//			recentlychangedjobs:     req.recentlychangedjobs.bool,
+//			yearsofexperience:       req.yearsofexperience.string,
+//			yearsofexperienceraw:    req.yearsofexperienceraw.int32,
+//			currentemployers:        currentemployers,
+//			pastemployers:           pastemployers,
+//			educationbackground:     educationbackground,
+//			honors:                  honors,
+//			certifications:          certifications,
+//		}
+//	}
+func (a *PeopleAdapter) RawProfileListGrpcFromCrustdata(row *crustdata.PersonDBProfile) *talv1.RawProfileListResponse {
+	var currentTitle, currentCompany string
+	if len(row.CurrentEmployers) > 0 {
+		currentTitle = row.CurrentEmployers[0].Title
+		currentCompany = row.CurrentEmployers[0].Name
+	} else if len(row.PastEmployers) > 0 {
+		currentTitle = row.PastEmployers[0].Title
+		currentCompany = row.PastEmployers[0].Name
+	}
+	return &talv1.RawProfileListResponse{
+		PersonId:       row.PersonID,
+		Name:           row.Name,
+		Headline:       row.Headline,
+		Location:       row.Region,
+		CurrentTitle:   currentTitle,
+		CurrentCompany: currentCompany,
+		Industry:       "", // Crustdata doesn’t provide a direct industry field; leave empty or derive later
+		Summary:        row.Summary,
+		Skills:         row.Skills,
+		SemanticScore:  0, // To be calculated if needed
+		TextRank:       0, // To be calculated if needed
+		HybridScore:    0, // To be calculated if needed
+	}
+
 }

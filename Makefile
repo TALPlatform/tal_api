@@ -98,18 +98,20 @@ init_weaviate_schema:
 refresh_vector_db:
 	curl -X DELETE http://localhost:8080/v1/schema/CommandPallete && make init_weaviate_schema
 
+seed_all:
+	make seed_super_user seed_accounts seed_storage seed_public seed_tenants seed_tenants_accounts seed_sourcing raw_profile_load
 rdb:
-	make raw_profile_bu supabase_reset refresh_vector_db seed_super_user seed_accounts seed_storage seed_public seed_tenants seed_tenants_accounts seed_sourcing raw_profile_load
+	make supabase_reset refresh_vector_db seed_all
 run:
 	go run main.go
 buf_push:
 	cd proto && buf push
 
 dtag:
-	docker tag devkit_api exploremelon/abc_portfolio:${v}
+	docker tag devkit_api exploremelon/tal_api:${v}
 
 dpush:
-	docker push  exploremelon/abc_portfolio:${v}
+	docker push  exploremelon/tal_api:${v}
 
 buf:
 	rm -rf proto_gen/tal/v1/*.pb.go && cd proto && buf lint && buf generate 

@@ -131,3 +131,10 @@ func (repo *AccountsRepo) UserPermissionsMap(ctx context.Context, userID int32) 
 	}
 	return &resp, nil
 }
+func (repo *AccountsRepo) SourcingSessionList(ctx context.Context, tenantID int32) (*[]db.SourcingSessionListRow, error) {
+	resp, err := repo.store.SourcingSessionList(ctx, tenantID)
+	if err != nil {
+		return nil, repo.store.DbErrorParser(err, repo.errorHandler)
+	}
+	return &resp, nil
+}

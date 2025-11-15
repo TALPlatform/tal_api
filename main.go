@@ -14,6 +14,8 @@ import (
 	"github.com/TALPlatform/tal_api/api"
 	"github.com/TALPlatform/tal_api/config"
 	"github.com/TALPlatform/tal_api/db"
+	"github.com/TALPlatform/tal_api/pkg/asynqclient"
+	"github.com/TALPlatform/tal_api/pkg/asynqworker"
 	"github.com/TALPlatform/tal_api/pkg/auth"
 	"github.com/TALPlatform/tal_api/pkg/redisclient"
 	"github.com/bufbuild/protovalidate-go"
@@ -103,7 +105,16 @@ func main() {
 		Password: config.RedisPassword,      // no password set
 		DB:       config.GenAIRedisDatabase, // use default DB
 	})
-	server, err := api.NewServer(config, store, tokenMaker, redisClient, genAiRedisClient, validator) // Start the server in a goroutine
+
+	asynqAddr := fmt.Sprintf("%s:%s", config.RedisHost, config.RedisPort)
+	asynqClient := asynqclient.New(asynqAddr)
+	asynqWorker := asynqworker.New(asynqAddr)
+	go func() {
+		if err := asynqWorker.Run(); err != nil {
+			log.Fatal().Err(err).Msg("asynq worker failed")
+		}
+	}()
+	server, err := api.NewServer(config, store, tokenMaker, redisClient, genAiRedisClient, validator, asynqClient, asynqWorker) // Start the server in a goroutine
 	if err != nil {
 		log.Fatal().Err(err).Msg("server initialization failed")
 	}
@@ -125,6 +136,13 @@ func main() {
 		"http-server": func(ctx context.Context) error {
 			return httpServer.Shutdown(ctx)
 
+		},
+		"asynq-client": func(ctx context.Context) error {
+			return asynqClient.Stop()
+		},
+		"asynq-worker": func(ctx context.Context) error {
+			asynqWorker.Stop() // Implement Stop in your worker (srv.Shutdown())
+			return nil
 		},
 		// Add other cleanup operations here
 	})

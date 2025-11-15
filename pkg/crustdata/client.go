@@ -7,7 +7,8 @@ import (
 // CrustdataServiceInterface defines the contract for Crustdata API operations
 type CrustdataServiceInterface interface {
 	// People Discovery API
-	PeopleSearch(ctx context.Context, req *PeopleSearchRequest) (*PeopleSearchResponse, error)
+	PeopleSearch(ctx context.Context, req *PeopleSearchRequest) (*[]byte, error)
+	PeopleSearchParse(data *[]byte) (*PeopleSearchResponse, error)
 }
 
 // CrustdataService implements the CrustdataServiceInterface

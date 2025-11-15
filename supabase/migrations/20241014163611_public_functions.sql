@@ -274,3 +274,20 @@ END;
 $$
 LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION "public"."describe"("p_schema_name" character varying, "p_table_name" character varying) RETURNS TABLE("column_name" character varying, "data_type" character varying, "is_nullable" character varying, "column_default" "text")
+    LANGUAGE "sql"
+    AS $$
+SELECT
+    c.column_name::VARCHAR,
+    c.data_type::VARCHAR,
+    c.is_nullable::VARCHAR,
+    c.column_default::TEXT
+FROM
+    information_schema.columns c
+WHERE
+    c.table_schema = p_schema_name
+    AND c.table_name = p_table_name
+ORDER BY
+    c.ordinal_position;
+$$;

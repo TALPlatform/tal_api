@@ -77,3 +77,12 @@ VALUES (
   'site_name',
   'Abc Hotels');
 
+
+update 
+accounts_schema.permission set permission_group = 'sourcing_session_criteria' where lower(permission_function) like '%sourcingsessioncriteria%';
+
+
+update 
+accounts_schema.permission set permission_group = 'sourcing_session' where lower(permission_function) like '%sourcingsession%';
+update 
+accounts_schema.permission set permission_group = 'sourcing_project' where lower(permission_function) like '%sourcingpro%';
